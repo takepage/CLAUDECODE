@@ -7,39 +7,43 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Dark Mode Colors
-        'dark-bg': '#0a0a0a',
-        'dark-card': '#141414',
-        'dark-card-hover': '#1a1a1a',
+        // Light Mode Colors
+        'light-bg': '#F9FAFB',
+        'light-card': '#FFFFFF',
+        'light-card-hover': '#F3F4F6',
+        'light-border': '#E5E7EB',
 
-        // Neon & Vivid Colors
-        'neon-pink': '#ff006e',
-        'neon-magenta': '#f72585',
-        'neon-blue': '#4cc9f0',
-        'neon-cyan': '#4361ee',
-        'neon-green': '#06ffa5',
-        'neon-lime': '#7df9ff',
-        'neon-orange': '#ff6b35',
-        'neon-red': '#ef476f',
-        'neon-purple': '#b5179e',
-        'neon-yellow': '#ffd60a',
+        // Text Colors
+        'text-primary': '#111827',
+        'text-secondary': '#6B7280',
+        'text-tertiary': '#9CA3AF',
+
+        // Primary Brand Colors (포인트 컬러)
+        'primary': '#10B981',      // 녹색 (메인)
+        'primary-dark': '#059669',
+        'primary-light': '#D1FAE5',
+
+        'secondary': '#3B82F6',    // 파란색 (서브)
+        'secondary-dark': '#2563EB',
+        'secondary-light': '#DBEAFE',
+
+        // Accent Colors (차트/데이터용)
+        'accent-green': '#10B981',
+        'accent-blue': '#3B82F6',
+        'accent-purple': '#8B5CF6',
+        'accent-orange': '#F59E0B',
+        'accent-red': '#EF4444',
+        'accent-pink': '#EC4899',
       },
       borderRadius: {
         'xl': '1rem',
         '2xl': '1.5rem',
         '3xl': '2rem',
-        '4xl': '2.5rem',
-        '5xl': '3rem',
       },
       boxShadow: {
-        'glow-pink': '0 0 20px rgba(255, 0, 110, 0.5)',
-        'glow-blue': '0 0 20px rgba(76, 201, 240, 0.5)',
-        'glow-green': '0 0 20px rgba(6, 255, 165, 0.5)',
-        'glow-orange': '0 0 20px rgba(255, 107, 53, 0.5)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-      },
-      backdropBlur: {
-        'xs': '2px',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'card-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
