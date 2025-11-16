@@ -1,5 +1,5 @@
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
-import { Brain } from 'lucide-react';
+import { Brain, Award } from 'lucide-react';
 
 interface StrengthData {
   category: string;
@@ -13,22 +13,28 @@ interface StrengthRadarChartProps {
 
 const defaultData: StrengthData[] = [
   { category: '역도', value: 85, fullMark: 100 },
-  { category: '체조', value: 70, fullMark: 100 },
-  { category: '심폐지구력', value: 90, fullMark: 100 },
-  { category: '파워', value: 88, fullMark: 100 },
+  { category: '스트렝스', value: 88, fullMark: 100 },
+  { category: '머신', value: 90, fullMark: 100 },
+  { category: '짐네스틱', value: 70, fullMark: 100 },
+  { category: '심폐지구력', value: 92, fullMark: 100 },
   { category: '근지구력', value: 75, fullMark: 100 },
-  { category: '유연성', value: 65, fullMark: 100 },
 ];
 
 export default function StrengthRadarChart({ data = defaultData }: StrengthRadarChartProps) {
-  // AI 분석 코멘트 (실제로는 AI API에서 가져옴)
-  const aiAnalysis = "스트렝스(역도, 파워)는 우수하나, 체조와 유연성이 상대적으로 부족합니다. 짐내스틱 움직임(Gymnastics) 강화 트레이닝을 추천합니다.";
+  // 가장 높은 점수의 카테고리 찾기
+  const topCategory = data.reduce((max, item) =>
+    item.value > max.value ? item : max, data[0]
+  );
+
+  const athleteType = `${topCategory.category}형`;
+
+  const aiAnalysis = `당신은 ${athleteType} 애슬릿입니다. ${topCategory.category} 능력이 뛰어나며(${topCategory.value}점), 짐네스틱 영역을 보완하면 균형잡힌 크로스핏터가 될 수 있습니다.`;
 
   return (
     <div className="card card-hover p-6">
       <div className="mb-6">
         <h3 className="text-xl font-bold text-text-primary mb-1">강점/약점 분석</h3>
-        <p className="text-sm text-text-secondary">육각형 그래프로 보는 내 능력치</p>
+        <p className="text-sm text-text-secondary">6가지 영역으로 보는 내 능력치</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -89,8 +95,21 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
         </div>
 
         {/* AI Analysis Comment */}
-        <div className="lg:col-span-1">
-          <div className="p-5 rounded-xl bg-secondary-light border border-secondary/20 h-full flex flex-col">
+        <div className="lg:col-span-1 space-y-4">
+          {/* 운동 타입 배지 */}
+          <div className="p-5 rounded-xl bg-gradient-to-br from-primary to-secondary text-white">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-5 h-5" />
+              <h4 className="font-semibold">운동 타입</h4>
+            </div>
+            <div className="text-3xl font-bold mt-2">{athleteType}</div>
+            <div className="text-sm opacity-90 mt-1">
+              {topCategory.category} 특화 애슬릿
+            </div>
+          </div>
+
+          {/* AI 분석 */}
+          <div className="p-5 rounded-xl bg-secondary-light border border-secondary/20 flex flex-col">
             <div className="flex items-center gap-2 mb-3">
               <Brain className="w-5 h-5 text-secondary" />
               <h4 className="font-semibold text-text-primary">AI 분석</h4>
