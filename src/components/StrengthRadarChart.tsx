@@ -1,34 +1,38 @@
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import { Brain, Award } from 'lucide-react';
+import { STRENGTH_ANALYSIS } from '../data/dummyData';
 
 interface StrengthData {
-  category: string;
-  value: number;
-  fullMark: number;
+  name: string;
+  score: number;
+  maxScore: number;
 }
 
 interface StrengthRadarChartProps {
   data?: StrengthData[];
 }
 
-const defaultData: StrengthData[] = [
-  { category: '역도', value: 85, fullMark: 100 },
-  { category: '스트렝스', value: 88, fullMark: 100 },
-  { category: '머신', value: 90, fullMark: 100 },
-  { category: '짐네스틱', value: 70, fullMark: 100 },
-  { category: '심폐지구력', value: 92, fullMark: 100 },
-  { category: '근지구력', value: 75, fullMark: 100 },
-];
+// 0-10점 스케일로 변경
+const defaultData: StrengthData[] = STRENGTH_ANALYSIS.categories;
 
 export default function StrengthRadarChart({ data = defaultData }: StrengthRadarChartProps) {
-  // 가장 높은 점수의 카테고리 찾기
-  const topCategory = data.reduce((max, item) =>
-    item.value > max.value ? item : max, data[0]
-  );
+  // 평균 점수 계산
+  const averageScore = (data.reduce((sum, item) => sum + item.score, 0) / data.length).toFixed(1);
 
-  const athleteType = `${topCategory.category}형`;
+  // 선수 유형 정보
+  const athleteType = STRENGTH_ANALYSIS.athleteType;
+  const athleteEmoji = STRENGTH_ANALYSIS.athleteEmoji;
+  const topCategory = STRENGTH_ANALYSIS.topCategory;
+  const topScore = STRENGTH_ANALYSIS.topScore;
 
-  const aiAnalysis = `당신은 ${athleteType} 애슬릿입니다. ${topCategory.category} 능력이 뛰어나며(${topCategory.value}점), 짐네스틱 영역을 보완하면 균형잡힌 크로스핏터가 될 수 있습니다.`;
+  const aiAnalysis = `데드리프트 206kg의 중량 덕후! 바벨만 잡으면 괴물이 되지만, 링 운동은... 아직 연습 중입니다. Grace 2분 컷의 실력자로 스트렝스(${topScore}/10)가 최강 강점입니다.`;
+
+  // Recharts용 데이터 형식 변환
+  const chartData = data.map(item => ({
+    category: item.name,
+    value: item.score,
+    fullMark: item.maxScore
+  }));
 
   return (
     <div className="card card-hover p-6">
@@ -41,7 +45,7 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
         {/* Radar Chart */}
         <div className="lg:col-span-2">
           <ResponsiveContainer width="100%" height={350}>
-            <RadarChart data={data}>
+            <RadarChart data={chartData}>
               <defs>
                 <linearGradient id="radarGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#10B981" stopOpacity={0.6} />
@@ -66,7 +70,7 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
 
               <PolarRadiusAxis
                 angle={90}
-                domain={[0, 100]}
+                domain={[0, 10]}
                 tick={{ fill: '#9CA3AF', fontSize: 11 }}
                 stroke="#E5E7EB"
               />
@@ -85,11 +89,11 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
           <div className="mt-4 flex justify-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-primary"></div>
-              <span className="text-text-secondary">현재 수준</span>
+              <span className="text-text-secondary">현재 수준 (평균 {averageScore}/10)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-              <span className="text-text-secondary">최대치 (100%)</span>
+              <span className="text-text-secondary">최대치 (10점)</span>
             </div>
           </div>
         </div>
@@ -100,11 +104,14 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
           <div className="p-5 rounded-xl bg-gradient-to-br from-primary to-secondary text-white">
             <div className="flex items-center gap-2 mb-2">
               <Award className="w-5 h-5" />
-              <h4 className="font-semibold">운동 타입</h4>
+              <h4 className="font-semibold">선수 유형</h4>
             </div>
-            <div className="text-3xl font-bold mt-2">{athleteType}</div>
-            <div className="text-sm opacity-90 mt-1">
-              {topCategory.category} 특화 애슬릿
+            <div className="text-3xl font-bold mt-2 flex items-center gap-2">
+              <span>{athleteType}</span>
+              <span className="text-4xl">{athleteEmoji}</span>
+            </div>
+            <div className="text-sm opacity-90 mt-2">
+              {topCategory} 특화 • 평균 {averageScore}/10
             </div>
           </div>
 

@@ -3,27 +3,59 @@ import StrengthRadarChart from '../components/StrengthRadarChart';
 import OneRMTrendChart from '../components/OneRMTrendChart';
 import { MapPin, Calendar, Flame, ChevronDown, ChevronUp } from 'lucide-react';
 import Tooltip from '../components/Tooltip';
+import { USER_PROFILE, ATTENDANCE_DAYS, RECENT_WODS } from '../data/dummyData';
 
 export default function Dashboard() {
   const [attendanceDays, setAttendanceDays] = useState<string[]>([]);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
-  const consecutiveDays = 3; // 연속 출석 일수 (실제로는 계산 필요)
-  const boxMembershipDaysLeft = 18; // 회원권 남은 날짜
+
+  // 회원권 남은 날짜 계산
+  const calculateDaysLeft = () => {
+    const endDate = new Date(USER_PROFILE.membershipEnd);
+    const today = new Date();
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const boxMembershipDaysLeft = calculateDaysLeft();
+
+  // 연속 출석 일수 계산
+  const calculateConsecutiveDays = (days: string[]) => {
+    if (days.length === 0) return 0;
+
+    const sortedDays = [...days].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let consecutive = 0;
+    let currentDate = new Date(today);
+
+    for (let i = 0; i < sortedDays.length; i++) {
+      const checkDate = new Date(sortedDays[i]);
+      checkDate.setHours(0, 0, 0, 0);
+
+      const dayDiff = Math.floor((currentDate.getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (dayDiff === 0 || dayDiff === 1) {
+        consecutive++;
+        currentDate = checkDate;
+      } else {
+        break;
+      }
+    }
+
+    return consecutive;
+  };
+
+  const [consecutiveDays, setConsecutiveDays] = useState(0);
 
   useEffect(() => {
-    // localStorage에서 출석 데이터 로드
+    // localStorage에서 출석 데이터 로드, 없으면 더미 데이터 사용
     const data = localStorage.getItem('attendanceDays');
-    if (data) {
-      setAttendanceDays(JSON.parse(data));
-    } else {
-      // 샘플 데이터
-      setAttendanceDays([
-        '2024-11-01', '2024-11-02', '2024-11-03',
-        '2024-11-05', '2024-11-06', '2024-11-08',
-        '2024-11-10', '2024-11-12', '2024-11-13',
-        '2024-11-14', '2024-11-15'
-      ]);
-    }
+    const loadedDays = data ? JSON.parse(data) : ATTENDANCE_DAYS;
+    setAttendanceDays(loadedDays);
+    setConsecutiveDays(calculateConsecutiveDays(loadedDays));
   }, []);
 
   // 현재 주의 날짜들 (일~토)
@@ -66,8 +98,8 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex-1">
-            <h4 className="text-2xl font-bold text-text-primary mb-2">CrossFit Seoul</h4>
-            <p className="text-sm text-text-secondary mb-4">서울시 강남구</p>
+            <h4 className="text-2xl font-bold text-text-primary mb-2">{USER_PROFILE.box}</h4>
+            <p className="text-sm text-text-secondary mb-4">수원시 팔달구</p>
           </div>
           <div className="pt-4 border-t border-light-border">
             <div className="flex items-center justify-between">
@@ -219,24 +251,29 @@ export default function Dashboard() {
           <Tooltip content="최근 수행한 WOD 기록입니다. 클릭하면 상세 보기!" />
         </div>
         <div className="space-y-3">
-          {[
-            { name: 'Fran', date: '2024-11-15', time: '4:32', type: 'For Time' },
-            { name: 'Murph', date: '2024-11-13', time: '42:15', type: 'For Time' },
-            { name: 'Cindy', date: '2024-11-11', time: '20 Rounds', type: 'AMRAP' },
-          ].map((wod, index) => (
-            <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-light-bg hover:bg-light-card-hover transition-colors cursor-pointer group">
+          {RECENT_WODS.slice(0, 5).map((wod, index) => (
+            <div key={wod.id} className="flex items-center justify-between p-4 rounded-xl bg-light-bg hover:bg-light-card-hover transition-colors cursor-pointer group">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary-light group-hover:bg-primary group-hover:text-white transition-colors flex items-center justify-center">
                   <span className="text-lg font-bold text-primary group-hover:text-white">{index + 1}</span>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-text-primary">{wod.name}</h4>
+                  <h4 className="font-semibold text-text-primary flex items-center gap-2">
+                    {wod.wodName}
+                    {wod.rxd ? (
+                      <span className="text-xs px-2 py-0.5 rounded bg-primary text-white font-bold">RXD</span>
+                    ) : (
+                      <span className="text-xs px-2 py-0.5 rounded bg-gray-400 text-white font-bold">Scaled</span>
+                    )}
+                  </h4>
                   <p className="text-sm text-text-secondary">{wod.date}</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold text-primary">{wod.time}</div>
-                <div className="text-xs text-text-tertiary">{wod.type}</div>
+                <div className="text-lg font-bold text-primary">
+                  {wod.time || `${wod.rounds} rounds`}
+                </div>
+                <div className="text-xs text-text-tertiary">{wod.wodType}</div>
               </div>
             </div>
           ))}
