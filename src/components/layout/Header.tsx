@@ -1,5 +1,6 @@
 import { Bell, Radio } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import Tooltip from '../Tooltip';
 
 export default function Header() {
   const [isLive, setIsLive] = useState(false);
@@ -26,8 +27,29 @@ export default function Header() {
 
   const handleLiveToggle = () => {
     if (isLive) {
-      // LIVE 종료 - 운동 시간 저장 로직 추가 가능
-      alert(`박스 체류 시간: ${formatTime(liveTime)}`);
+      // LIVE 종료 - 출석 체크 및 운동 시간 저장
+      const today = new Date().toISOString().split('T')[0];
+      const workoutData = {
+        date: today,
+        duration: liveTime,
+        timestamp: Date.now(),
+      };
+
+      // localStorage에 저장
+      const existingData = localStorage.getItem('workoutHistory');
+      const workoutHistory = existingData ? JSON.parse(existingData) : [];
+      workoutHistory.push(workoutData);
+      localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+      // 출석 날짜 저장
+      const attendanceData = localStorage.getItem('attendanceDays');
+      const attendanceDays = attendanceData ? JSON.parse(attendanceData) : [];
+      if (!attendanceDays.includes(today)) {
+        attendanceDays.push(today);
+        localStorage.setItem('attendanceDays', JSON.stringify(attendanceDays));
+      }
+
+      alert(`✅ 운동 완료!\n박스 체류 시간: ${formatTime(liveTime)}\n출석이 자동으로 기록되었습니다.`);
     }
     setIsLive(!isLive);
   };
@@ -36,33 +58,39 @@ export default function Header() {
     <header className="bg-white border-b border-light-border sticky top-0 z-10">
       <div className="px-8 py-4">
         <div className="flex items-center justify-between">
-          {/* LIVE 버튼 */}
-          <button
-            onClick={handleLiveToggle}
-            className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all ${
-              isLive
-                ? 'bg-accent-red text-white shadow-lg animate-pulse'
-                : 'bg-light-bg text-text-secondary hover:bg-light-card-hover'
-            }`}
-          >
-            <Radio className="w-5 h-5" />
-            {isLive ? (
-              <div className="flex items-center gap-2">
-                <span>LIVE</span>
-                <span className="text-sm font-mono">{formatTime(liveTime)}</span>
-              </div>
-            ) : (
-              <span>운동 시작</span>
-            )}
-          </button>
+          {/* LIVE 버튼 - 더 길게 */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleLiveToggle}
+              className={`flex items-center gap-3 px-8 py-3 rounded-xl font-semibold transition-all min-w-[200px] ${
+                isLive
+                  ? 'bg-accent-red text-white shadow-lg animate-pulse'
+                  : 'bg-gradient-to-r from-primary to-secondary text-white hover:shadow-md'
+              }`}
+            >
+              <Radio className="w-5 h-5" />
+              {isLive ? (
+                <div className="flex items-center gap-2">
+                  <span>LIVE</span>
+                  <span className="text-sm font-mono">{formatTime(liveTime)}</span>
+                </div>
+              ) : (
+                <span>운동 시작하기</span>
+              )}
+            </button>
+
+            <Tooltip content="클릭하면 운동 시작! 다시 클릭하면 종료 후 자동으로 출석 체크됩니다." />
+          </div>
 
           {/* Right Section */}
           <div className="flex items-center gap-4">
             {/* Notifications */}
-            <button className="relative p-2 rounded-xl hover:bg-light-card-hover transition-colors">
-              <Bell className="w-5 h-5 text-text-secondary" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-accent-red rounded-full"></span>
-            </button>
+            <div className="relative">
+              <button className="relative p-2 rounded-xl hover:bg-light-card-hover transition-colors">
+                <Bell className="w-5 h-5 text-text-secondary" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-accent-red rounded-full"></span>
+              </button>
+            </div>
 
             {/* Profile */}
             <button className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-light-card-hover transition-colors">
