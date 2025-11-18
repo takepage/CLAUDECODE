@@ -7,41 +7,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Background Colors (모바일 앱 스타일)
-        'bg-base': '#F0F9F5',      // 연한 민트 배경 (전체)
-        'bg-card': '#FFFFFF',      // 카드 배경
-        'light-bg': '#F0F9F5',     // bg-base와 동일 (하위 호환)
-        'light-card': '#FFFFFF',
-        'light-card-hover': '#F3F4F6',
-        'light-border': '#E5E7EB',
+        // Background Colors (옅은 초록 톤)
+        'bg-base': '#D7E9D0',         // 전체 배경 (옅은 초록)
+        'bg-card': '#EFF7EE',         // 카드 배경 (거의 흰색에 가까운 옅은 초록)
+        'light-bg': '#D7E9D0',        // bg-base와 동일 (하위 호환)
+        'light-card': '#EFF7EE',
+        'light-card-hover': '#E5F3E3',
+        'light-border': '#C5DFC0',
 
-        // Text Colors
-        'text-primary': '#1F2937',  // 약간 더 진한 텍스트
-        'text-secondary': '#6B7280',
-        'text-tertiary': '#9CA3AF',
+        // Text Colors (진한 검정)
+        'text-primary': '#010400',    // 메인 텍스트 (거의 검정)
+        'text-secondary': '#2C3E2A',  // 보조 텍스트
+        'text-tertiary': '#5A6C57',   // 삼차 텍스트
 
-        // Primary Brand Colors
-        'primary': '#10B981',       // 메인 초록
-        'primary-dark': '#059669',  // 진한 초록
-        'primary-light': '#D1FAE5', // 연한 초록
+        // Primary Brand Colors (초록 톤)
+        'primary': '#409B60',         // 메인 초록
+        'primary-dark': '#1F332A',    // 강조 짙은 초록
+        'primary-light': '#A8D5BA',   // 연한 초록
 
-        'secondary': '#3B82F6',     // 파란색
-        'secondary-dark': '#2563EB',
-        'secondary-light': '#DBEAFE',
+        'secondary': '#3B7A56',       // 보조 초록
+        'secondary-dark': '#2A5840',
+        'secondary-light': '#B8D9C8',
 
-        // Semantic Colors (의미있는 컬러)
-        'danger': '#EF4444',        // 위험, 타이머 운동 구간
-        'info': '#3B82F6',          // 정보, 타이머 휴식 구간
-        'warning': '#F59E0B',       // 경고, PR 알림
-        'success': '#10B981',       // 성공, 완료
+        // Semantic Colors
+        'danger': '#D64545',          // 위험, 타이머 운동 구간
+        'info': '#4A90A4',            // 정보
+        'warning': '#E6A23C',         // 경고, PR 알림
+        'success': '#409B60',         // 성공, 완료 (primary와 동일)
 
-        // Legacy Accent Colors (차트용)
-        'accent-green': '#10B981',
-        'accent-blue': '#3B82F6',
-        'accent-purple': '#8B5CF6',
-        'accent-orange': '#F59E0B',
-        'accent-red': '#EF4444',
-        'accent-pink': '#EC4899',
+        // Legacy Accent Colors (차트용 - 초록 톤 조정)
+        'accent-green': '#409B60',
+        'accent-blue': '#4A90A4',
+        'accent-purple': '#7B8BA3',
+        'accent-orange': '#E6A23C',
+        'accent-red': '#D64545',
+        'accent-pink': '#C98B9E',
       },
       borderRadius: {
         'xl': '1rem',
@@ -49,14 +49,14 @@ export default {
         '3xl': '2rem',
       },
       boxShadow: {
-        'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        'card-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        'float': '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
+        'sm': '0 1px 2px 0 rgba(31, 51, 42, 0.05)',
+        'card': '0 1px 3px 0 rgba(31, 51, 42, 0.1), 0 1px 2px 0 rgba(31, 51, 42, 0.06)',
+        'card-hover': '0 4px 6px -1px rgba(31, 51, 42, 0.1), 0 2px 4px -1px rgba(31, 51, 42, 0.06)',
+        'card-lg': '0 10px 15px -3px rgba(31, 51, 42, 0.1), 0 4px 6px -2px rgba(31, 51, 42, 0.05)',
+        'float': '0 10px 25px -5px rgba(31, 51, 42, 0.15)',
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       fontSize: {
         // 모바일 친화적 폰트 크기

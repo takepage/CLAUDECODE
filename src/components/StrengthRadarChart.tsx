@@ -128,20 +128,22 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
         </div>
 
         {/* AI Analysis Comment */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-1 flex items-stretch">
           {/* 운동 타입 배지 */}
-          <div className="p-4 rounded-xl bg-primary text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Award className="w-4 h-4" />
-              <h4 className="text-sm font-semibold">선수 유형</h4>
+          <div className="p-4 rounded-xl bg-primary text-white w-full flex flex-col justify-between min-h-[280px]">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Award className="w-4 h-4" />
+                <h4 className="text-sm font-semibold">선수 유형</h4>
+              </div>
+              <div className="text-xl font-bold mt-2">
+                {athleteType}
+              </div>
+              <div className="text-xs opacity-90 mt-2 leading-relaxed">
+                {typeExplanation}
+              </div>
             </div>
-            <div className="text-xl font-bold mt-2">
-              {athleteType}
-            </div>
-            <div className="text-xs opacity-90 mt-2 leading-relaxed">
-              {typeExplanation}
-            </div>
-            <div className="text-xs opacity-80 mt-2 pt-2 border-t border-white/20">
+            <div className="text-xs opacity-80 pt-2 border-t border-white/20">
               {topCategory} 특화 • 평균 {averageScore}/10
             </div>
           </div>

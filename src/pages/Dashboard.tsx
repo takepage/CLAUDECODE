@@ -158,15 +158,15 @@ export default function Dashboard() {
   const getInsightStyle = (type: string) => {
     switch (type) {
       case 'pr':
-        return 'bg-primary text-white';
+        return 'bg-primary-light text-primary border border-primary/20';
       case 'fact':
-        return 'bg-secondary text-white';
+        return 'bg-secondary-light text-secondary border border-secondary/20';
       case 'reminder':
-        return 'bg-accent-purple text-white';
+        return 'bg-accent-purple/10 text-accent-purple border border-accent-purple/20';
       case 'goal':
-        return 'bg-primary text-white';
+        return 'bg-primary-light text-primary border border-primary/20';
       default:
-        return 'bg-primary-light text-primary';
+        return 'bg-light-bg text-text-primary border border-light-border';
     }
   };
 
@@ -316,7 +316,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-7 gap-1">
               {monthCalendarDays.map((date, index) => {
                 if (!date) {
-                  return <div key={`empty-${index}`} className="aspect-square md:aspect-auto md:h-8" />;
+                  return <div key={`empty-${index}`} className="h-7 md:h-6" />;
                 }
 
                 const dateString = date.toISOString().split('T')[0];
@@ -326,7 +326,7 @@ export default function Dashboard() {
                   <div
                     key={index}
                     onClick={() => isAttended && handleDateClick(dateString)}
-                    className={`aspect-square md:aspect-auto md:h-8 flex items-center justify-center text-xs rounded-lg transition-all ${
+                    className={`h-7 md:h-6 flex items-center justify-center text-xs rounded-lg transition-all ${
                       isAttended
                         ? 'bg-primary text-white font-bold cursor-pointer hover:bg-primary/80 hover:scale-110'
                         : 'bg-light-bg text-text-tertiary'
