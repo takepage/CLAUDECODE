@@ -1,10 +1,14 @@
-import { Bell, Radio } from 'lucide-react';
+import { Bell, Radio, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Tooltip from '../Tooltip';
 import QuickWorkoutLogModal from '../QuickWorkoutLogModal';
 import type { WorkoutLogData } from '../QuickWorkoutLogModal';
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const [isLive, setIsLive] = useState(false);
   const [liveTime, setLiveTime] = useState(0);
   const [showWorkoutLogModal, setShowWorkoutLogModal] = useState(false);
@@ -90,49 +94,64 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white border-b border-light-border sticky top-0 z-10">
-      <div className="px-8 py-4">
-        <div className="flex items-center justify-between">
-          {/* LIVE 버튼 - 더 길게 */}
-          <div className="flex items-center gap-3">
+    <header className="bg-bg-card border-b border-light-border sticky top-0 z-30">
+      <div className="px-4 md:px-6 lg:px-8 py-3 md:py-4">
+        <div className="flex items-center justify-between gap-2">
+          {/* Left Section */}
+          <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+            {/* Hamburger Menu (Mobile Only) */}
+            <button
+              onClick={onMenuClick}
+              className="lg:hidden p-2 rounded-lg hover:bg-light-card-hover transition-colors flex-shrink-0"
+              aria-label="메뉴 열기"
+            >
+              <Menu className="w-6 h-6 text-text-secondary" />
+            </button>
+
+            {/* LIVE Button */}
             <button
               onClick={handleLiveToggle}
-              className={`flex items-center gap-3 px-8 py-3 rounded-xl font-semibold transition-all min-w-[200px] ${
+              className={`flex items-center gap-2 px-3 md:px-6 py-2 md:py-3 rounded-xl font-semibold transition-all text-sm md:text-base min-w-0 flex-shrink ${
                 isLive
-                  ? 'bg-accent-red text-white shadow-lg animate-pulse'
-                  : 'bg-gradient-to-r from-primary to-secondary text-white hover:shadow-md'
+                  ? 'bg-danger text-white shadow-lg animate-pulse'
+                  : 'bg-primary text-white hover:shadow-md active:scale-95'
               }`}
             >
-              <Radio className="w-5 h-5" />
+              <Radio className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
               {isLive ? (
-                <div className="flex items-center gap-2">
-                  <span>LIVE</span>
-                  <span className="text-sm font-mono">{formatTime(liveTime)}</span>
+                <div className="flex items-center gap-1 md:gap-2 min-w-0">
+                  <span className="hidden sm:inline">LIVE</span>
+                  <span className="text-xs md:text-sm font-mono truncate">{formatTime(liveTime)}</span>
                 </div>
               ) : (
-                <span>운동 시작하기</span>
+                <span className="hidden sm:inline">운동 시작</span>
               )}
             </button>
 
-            <Tooltip content="클릭하면 운동 시작! 다시 클릭하면 종료 후 자동으로 출석 체크됩니다." />
+            <div className="hidden md:block">
+              <Tooltip content="클릭하면 운동 시작! 다시 클릭하면 종료 후 자동으로 출석 체크됩니다." />
+            </div>
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
             {/* Notifications */}
             <div className="relative">
-              <button className="relative p-2 rounded-xl hover:bg-light-card-hover transition-colors">
+              <button
+                className="relative p-2 rounded-xl hover:bg-light-card-hover transition-colors"
+                aria-label="알림"
+              >
                 <Bell className="w-5 h-5 text-text-secondary" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-accent-red rounded-full"></span>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
               </button>
             </div>
 
             {/* Profile */}
-            <button className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-light-card-hover transition-colors">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+            <button className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 rounded-xl hover:bg-light-card-hover transition-colors">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
                 JD
               </div>
-              <div className="hidden md:block text-left">
+              <div className="hidden lg:block text-left">
                 <div className="text-sm font-semibold text-text-primary">John Doe</div>
                 <div className="text-xs text-text-tertiary">운동 156일째</div>
               </div>
