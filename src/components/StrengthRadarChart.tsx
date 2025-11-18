@@ -70,8 +70,8 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Radar Chart */}
-        <div className="lg:col-span-2" style={{ outline: 'none' }}>
-          <ResponsiveContainer width="100%" height={350}>
+        <div className="lg:col-span-2 h-[280px] md:h-[350px]" style={{ outline: 'none' }}>
+          <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={chartData} style={{ outline: 'none' }}>
               <defs>
                 <linearGradient id="radarGradient" x1="0" y1="0" x2="0" y2="1">
@@ -130,20 +130,20 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
         {/* AI Analysis Comment */}
         <div className="lg:col-span-1 flex items-stretch">
           {/* 운동 타입 배지 */}
-          <div className="p-4 md:p-6 rounded-xl bg-primary text-white w-full flex flex-col justify-between min-h-[280px] md:min-h-0">
+          <div className="p-6 md:p-8 rounded-xl bg-primary text-white w-full flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-3">
                 <Award className="w-4 h-4 md:w-5 md:h-5" />
                 <h4 className="text-sm md:text-base font-semibold">선수 유형</h4>
               </div>
-              <div className="text-xl md:text-2xl font-bold mt-2">
+              <div className="text-xl md:text-2xl font-bold mt-3">
                 {athleteType}
               </div>
-              <div className="text-xs md:text-sm opacity-90 mt-2 md:mt-3 leading-relaxed">
+              <div className="text-xs md:text-sm opacity-90 mt-3 md:mt-4 leading-relaxed">
                 {typeExplanation}
               </div>
             </div>
-            <div className="text-xs md:text-sm opacity-80 pt-2 md:pt-3 border-t border-white/20 mt-3">
+            <div className="text-xs md:text-sm opacity-80 pt-3 md:pt-4 border-t border-white/20 mt-4 md:mt-6">
               {topCategory} 특화 • 평균 {averageScore}/10
             </div>
           </div>

@@ -64,22 +64,23 @@ export default function OneRMTrendChart() {
 
   return (
     <div className="card p-6">
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-3">
+      {/* 모바일: 세로 레이아웃, 데스크톱: 가로 레이아웃 */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 md:mb-6">
+        <div className="flex items-center gap-3 mb-4 md:mb-0">
           <div className="p-3 rounded-xl bg-primary-light">
-            <TrendingUp className="w-6 h-6 text-primary" />
+            <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-primary" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-text-primary">타임라인</h3>
-            <p className="text-sm text-text-secondary">2024.11.17부터 기록 중</p>
+            <h3 className="text-lg md:text-xl font-bold text-text-primary">타임라인</h3>
+            <p className="text-xs md:text-sm text-text-secondary">2024.11.17부터 기록 중</p>
           </div>
         </div>
 
         {/* 탭 메뉴 */}
-        <div className="flex gap-2 bg-light-bg p-1 rounded-xl">
+        <div className="flex gap-1.5 md:gap-2 bg-light-bg p-1 rounded-xl">
           <button
             onClick={() => setSelectedTrend('weight')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${
               selectedTrend === 'weight'
                 ? 'bg-white text-primary shadow-md'
                 : 'text-text-tertiary hover:text-text-secondary'
@@ -89,7 +90,7 @@ export default function OneRMTrendChart() {
           </button>
           <button
             onClick={() => setSelectedTrend('weightlifting')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${
               selectedTrend === 'weightlifting'
                 ? 'bg-white text-primary shadow-md'
                 : 'text-text-tertiary hover:text-text-secondary'
@@ -99,7 +100,7 @@ export default function OneRMTrendChart() {
           </button>
           <button
             onClick={() => setSelectedTrend('big3')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all ${
               selectedTrend === 'big3'
                 ? 'bg-white text-primary shadow-md'
                 : 'text-text-tertiary hover:text-text-secondary'
@@ -110,7 +111,8 @@ export default function OneRMTrendChart() {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
+      <div className="h-[220px] md:h-[300px]">
+        <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
           <defs>
             <linearGradient id="lineGradient1" x1="0" y1="0" x2="1" y2="0">
@@ -210,6 +212,7 @@ export default function OneRMTrendChart() {
           )}
         </LineChart>
       </ResponsiveContainer>
+      </div>
 
       {selectedTrend === 'weight' && (
         <div className="mt-6 p-4 rounded-xl bg-light-bg text-center">
