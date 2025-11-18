@@ -44,7 +44,7 @@ export default function Header() {
   const handleWorkoutSave = (data: WorkoutLogData) => {
     const today = new Date().toISOString().split('T')[0];
 
-    // 운동 상세 정보 저장
+    // 운동 상세 정보 저장 (workoutHistory)
     const workoutData = {
       date: today,
       duration: savedDuration,
@@ -52,11 +52,30 @@ export default function Header() {
       ...data
     };
 
-    // localStorage에 저장
     const existingData = localStorage.getItem('workoutHistory');
     const workoutHistory = existingData ? JSON.parse(existingData) : [];
     workoutHistory.push(workoutData);
     localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+    // 운동 기록 로그 생성 (workoutLogs) - 나중에 Logbook 페이지와 캘린더에서 사용
+    const workoutLog = {
+      id: `wod-${Date.now()}`,
+      date: today,
+      wodName: data.wodName,
+      wodType: 'CUSTOM', // 사용자가 직접 기록
+      classType: data.classType,
+      categories: data.categories,
+      duration: savedDuration,
+      feeling: data.feeling,
+      notes: data.notes,
+      rxd: true, // 기본값
+      timestamp: Date.now()
+    };
+
+    const existingLogs = localStorage.getItem('workoutLogs');
+    const workoutLogs = existingLogs ? JSON.parse(existingLogs) : [];
+    workoutLogs.unshift(workoutLog); // 최신 기록이 앞에 오도록
+    localStorage.setItem('workoutLogs', JSON.stringify(workoutLogs));
 
     // 출석 날짜 저장
     const attendanceData = localStorage.getItem('attendanceDays');
@@ -67,7 +86,7 @@ export default function Header() {
     }
 
     // 성공 메시지
-    alert(`✅ 운동 기록 완료!\n박스 체류 시간: ${formatTime(savedDuration)}\n출석이 자동으로 기록되었습니다.`);
+    alert(`✅ 운동 기록 완료!\n박스 체류 시간: ${formatTime(savedDuration)}\n출석 및 운동 기록이 자동으로 저장되었습니다.`);
   };
 
   return (

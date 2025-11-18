@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Dumbbell, Users } from 'lucide-react';
+import { X, Dumbbell, Users, Check } from 'lucide-react';
 
 interface QuickWorkoutLogModalProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface QuickWorkoutLogModalProps {
 
 export interface WorkoutLogData {
   classType: 'class' | 'opengym';
-  category: 'wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio';
+  categories: ('wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio')[]; // 복수 선택
   wodName: string;
   feeling: 'good' | 'normal' | 'bad';
   notes: string;
@@ -18,7 +18,7 @@ export interface WorkoutLogData {
 
 export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration }: QuickWorkoutLogModalProps) {
   const [classType, setClassType] = useState<'class' | 'opengym'>('class');
-  const [category, setCategory] = useState<'wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio'>('wod');
+  const [categories, setCategories] = useState<('wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio')[]>(['wod']);
   const [wodName, setWodName] = useState('');
   const [feeling, setFeeling] = useState<'good' | 'normal' | 'bad'>('good');
   const [notes, setNotes] = useState('');
@@ -37,7 +37,7 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
   const handleSave = () => {
     onSave({
       classType,
-      category,
+      categories,
       wodName: wodName || getCategoryDefaultName(),
       feeling,
       notes
@@ -46,14 +46,31 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
   };
 
   const getCategoryDefaultName = () => {
-    const defaults = {
-      wod: 'Daily WOD',
-      weightlifting: '역도 트레이닝',
-      strength: '스트렝스 트레이닝',
-      gymnastics: '짐네스틱 트레이닝',
-      cardio: '유산소 트레이닝'
-    };
-    return defaults[category];
+    if (categories.length === 0) return 'Daily Workout';
+    if (categories.length === 1) {
+      const defaults = {
+        wod: 'Daily WOD',
+        weightlifting: '역도 트레이닝',
+        strength: '스트렝스 트레이닝',
+        gymnastics: '짐네스틱 트레이닝',
+        cardio: '유산소 트레이닝'
+      };
+      return defaults[categories[0]];
+    }
+    // 복수 선택 시
+    return '복합 트레이닝';
+  };
+
+  const toggleCategory = (cat: 'wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio') => {
+    setCategories(prev => {
+      if (prev.includes(cat)) {
+        // 이미 선택되어 있으면 제거 (단, 최소 1개는 유지)
+        return prev.length > 1 ? prev.filter(c => c !== cat) : prev;
+      } else {
+        // 선택되어 있지 않으면 추가
+        return [...prev, cat];
+      }
+    });
   };
 
   return (
@@ -107,10 +124,10 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
             </div>
           </div>
 
-          {/* 운동 카테고리 */}
+          {/* 운동 카테고리 - 복수 선택 */}
           <div>
-            <label className="block text-sm font-semibold text-text-primary mb-3">
-              운동 종류
+            <label className="block text-sm font-semibold text-text-primary mb-2">
+              운동 종류 <span className="text-xs text-text-tertiary font-normal">(복수 선택 가능)</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
@@ -119,20 +136,38 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
                 { value: 'strength', label: '스트렝스' },
                 { value: 'gymnastics', label: '짐네스틱' },
                 { value: 'cardio', label: '유산소' }
-              ].map((cat) => (
-                <button
-                  key={cat.value}
-                  onClick={() => setCategory(cat.value as any)}
-                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    category === cat.value
-                      ? 'bg-secondary text-white shadow-md'
-                      : 'bg-light-bg text-text-secondary hover:bg-secondary-light'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
+              ].map((cat) => {
+                const isSelected = categories.includes(cat.value as any);
+                return (
+                  <button
+                    key={cat.value}
+                    onClick={() => toggleCategory(cat.value as any)}
+                    className={`relative px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                      isSelected
+                        ? 'bg-secondary text-white shadow-md'
+                        : 'bg-light-bg text-text-secondary hover:bg-secondary-light'
+                    }`}
+                  >
+                    {isSelected && (
+                      <Check className="absolute top-1 right-1 w-3 h-3" />
+                    )}
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
+            <p className="text-xs text-text-tertiary mt-2">
+              선택된 항목: {categories.map(c => {
+                const labels: Record<string, string> = {
+                  wod: 'WOD',
+                  weightlifting: '역도',
+                  strength: '스트렝스',
+                  gymnastics: '짐네스틱',
+                  cardio: '유산소'
+                };
+                return labels[c];
+              }).join(', ')}
+            </p>
           </div>
 
           {/* WOD 이름 */}

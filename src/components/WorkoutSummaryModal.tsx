@@ -8,7 +8,7 @@ interface WorkoutSummaryModalProps {
     wodName: string;
     wodType: string;
     classType: 'class' | 'opengym';
-    category: 'wod' | 'weightlifting' | 'strength' | 'gymnastics';
+    categories: ('wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio')[];
     time?: string;
     rounds?: number;
     duration: number; // 박스 체류 시간 (초)
@@ -39,7 +39,8 @@ export default function WorkoutSummaryModal({ date, isOpen, onClose, workoutData
       wod: 'WOD',
       weightlifting: '역도',
       strength: '스트렝스',
-      gymnastics: '짐네스틱'
+      gymnastics: '짐네스틱',
+      cardio: '유산소'
     };
     return labels[category as keyof typeof labels] || category;
   };
@@ -78,13 +79,15 @@ export default function WorkoutSummaryModal({ date, isOpen, onClose, workoutData
         {workoutData ? (
           <div className="space-y-4">
             {/* 운동 타입 배지 */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <span className="px-3 py-1 rounded-full bg-primary-light text-primary text-sm font-semibold">
                 {getClassTypeLabel(workoutData.classType)}
               </span>
-              <span className="px-3 py-1 rounded-full bg-secondary-light text-secondary text-sm font-semibold">
-                {getCategoryLabel(workoutData.category)}
-              </span>
+              {workoutData.categories.map((cat, index) => (
+                <span key={index} className="px-3 py-1 rounded-full bg-secondary-light text-secondary text-sm font-semibold">
+                  {getCategoryLabel(cat)}
+                </span>
+              ))}
             </div>
 
             {/* WOD 이름 */}

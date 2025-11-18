@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import StrengthRadarChart from '../components/StrengthRadarChart';
 import OneRMTrendChart from '../components/OneRMTrendChart';
 import WorkoutSummaryModal from '../components/WorkoutSummaryModal';
-import { MapPin, Calendar, Flame, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Calendar, Flame, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import Tooltip from '../components/Tooltip';
 import { USER_PROFILE, ATTENDANCE_DAYS, RECENT_WODS } from '../data/dummyData';
 
@@ -11,6 +11,8 @@ export default function Dashboard() {
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // 0-11
 
   // 회원권 남은 날짜 계산
   const calculateDaysLeft = () => {
@@ -78,7 +80,51 @@ export default function Dashboard() {
   };
 
   const weekDays = getCurrentWeekDays();
-  const monthDays = Array.from({ length: 30 }, (_, i) => i + 1);
+
+  // 선택된 월의 캘린더 데이터 생성
+  const getMonthCalendar = () => {
+    const firstDay = new Date(selectedYear, selectedMonth, 1);
+    const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay(); // 0 (일요일) ~ 6 (토요일)
+
+    const calendarDays: (Date | null)[] = [];
+
+    // 이전 달의 빈 칸
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      calendarDays.push(null);
+    }
+
+    // 현재 달의 날짜들
+    for (let day = 1; day <= daysInMonth; day++) {
+      calendarDays.push(new Date(selectedYear, selectedMonth, day));
+    }
+
+    return calendarDays;
+  };
+
+  const monthCalendarDays = getMonthCalendar();
+
+  // 월 변경 핸들러
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
 
   const isAttendanceDay = (date: Date) => {
     const dateString = date.toISOString().split('T')[0];
@@ -95,6 +141,27 @@ export default function Dashboard() {
 
   // 선택된 날짜의 운동 데이터 가져오기
   const getWorkoutDataForDate = (dateString: string) => {
+    // 1. localStorage의 workoutLogs 먼저 확인
+    const logsData = localStorage.getItem('workoutLogs');
+    if (logsData) {
+      const workoutLogs = JSON.parse(logsData);
+      const logWorkout = workoutLogs.find((wod: any) => wod.date === dateString);
+      if (logWorkout) {
+        return {
+          wodName: logWorkout.wodName,
+          wodType: logWorkout.wodType,
+          classType: logWorkout.classType,
+          categories: logWorkout.categories,
+          time: logWorkout.time,
+          rounds: logWorkout.rounds,
+          duration: logWorkout.duration,
+          feeling: logWorkout.feeling,
+          notes: logWorkout.notes
+        };
+      }
+    }
+
+    // 2. 더미 데이터 확인
     const workout = RECENT_WODS.find(wod => wod.date === dateString);
     if (!workout) return undefined;
 
@@ -102,7 +169,7 @@ export default function Dashboard() {
       wodName: workout.wodName,
       wodType: workout.wodType,
       classType: workout.classType,
-      category: workout.category,
+      categories: workout.categories || [workout.category], // 하위 호환성
       time: workout.time,
       rounds: workout.rounds,
       duration: workout.duration,
@@ -195,6 +262,25 @@ export default function Dashboard() {
           {isCalendarExpanded ? (
             /* 월별 캘린더 */
             <>
+              {/* 월/년 네비게이션 */}
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={handlePrevMonth}
+                  className="p-2 hover:bg-light-bg rounded-lg transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4 text-text-tertiary" />
+                </button>
+                <div className="font-semibold text-text-primary">
+                  {selectedYear}년 {monthNames[selectedMonth]}
+                </div>
+                <button
+                  onClick={handleNextMonth}
+                  className="p-2 hover:bg-light-bg rounded-lg transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4 text-text-tertiary" />
+                </button>
+              </div>
+
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
                   <div key={day} className="text-xs text-center text-text-tertiary font-semibold">
@@ -203,28 +289,36 @@ export default function Dashboard() {
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1">
-                {monthDays.map((day) => {
-                  const date = new Date(2024, 10, day); // 11월
+                {monthCalendarDays.map((date, index) => {
+                  if (!date) {
+                    // 빈 칸
+                    return <div key={`empty-${index}`} className="aspect-square" />;
+                  }
+
                   const dateString = date.toISOString().split('T')[0];
                   const isAttended = attendanceDays.includes(dateString);
 
                   return (
                     <div
-                      key={day}
-                      onClick={() => handleDateClick(dateString)}
+                      key={index}
+                      onClick={() => isAttended && handleDateClick(dateString)}
                       className={`aspect-square flex items-center justify-center text-xs rounded-lg transition-all ${
                         isAttended
                           ? 'bg-primary text-white font-bold cursor-pointer hover:bg-primary/80 hover:scale-110'
                           : 'bg-light-bg text-text-tertiary'
                       }`}
                     >
-                      {day}
+                      {date.getDate()}
                     </div>
                   );
                 })}
               </div>
               <div className="mt-4 text-sm text-text-secondary text-center">
-                11월 총 {attendanceDays.length}일 출석
+                {selectedYear}년 {monthNames[selectedMonth]} 총{' '}
+                {attendanceDays.filter((dateString) => {
+                  const d = new Date(dateString);
+                  return d.getFullYear() === selectedYear && d.getMonth() === selectedMonth;
+                }).length}일 출석
               </div>
             </>
           ) : (
