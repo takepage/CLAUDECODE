@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Plus, Trash2, Copy, Clock, Zap, Timer, Target, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
+import { Sparkles, Plus, Trash2, Copy, Clock, Zap, Timer, Target, ChevronDown, ChevronUp, GripVertical, Upload, Image, X } from 'lucide-react';
 
 // 크로스핏 동작 리스트 (자동완성용)
 const CROSSFIT_MOVEMENTS = [
@@ -65,6 +65,12 @@ interface Movement {
   unit?: string;
   isProgressive: boolean;
   progressivePattern?: string;
+  // 스케일링 관련
+  isScaled: boolean;
+  scaledMovementName?: string; // 동작 스케일 (예: C2B → Pull-up)
+  rxdWeight?: number;
+  scaledWeight?: number;
+  weightUnit?: 'lb' | 'kg';
 }
 
 interface Section {
@@ -82,6 +88,8 @@ export default function WODStrategy() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [draggedSection, setDraggedSection] = useState<string | null>(null);
   const [movementSuggestions, setMovementSuggestions] = useState<{ [key: string]: string[] }>({});
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // 섹션 추가
   const addSection = (type: Section['type']) => {
@@ -160,7 +168,9 @@ export default function WODStrategy() {
       name: '',
       type: 'reps',
       value: '',
-      isProgressive: false
+      isProgressive: false,
+      isScaled: false,
+      weightUnit: 'lb'
     };
     setSections(sections.map(s =>
       s.id === sectionId
@@ -226,6 +236,51 @@ export default function WODStrategy() {
     setExpandedSections(newExpanded);
   };
 
+  // 무게 스케일 퍼센티지 계산
+  const calculateWeightPercentage = (rxd?: number, scaled?: number): number | null => {
+    if (!rxd || !scaled || rxd === 0) return null;
+    return Math.round((scaled / rxd) * 100);
+  };
+
+  // 퍼센티지에 따른 색상 반환
+  const getPercentageColor = (percentage: number): string => {
+    if (percentage >= 80) return 'text-primary bg-primary-light';
+    if (percentage >= 60) return 'text-yellow-600 bg-yellow-50';
+    return 'text-orange-600 bg-orange-50';
+  };
+
+  // 이미지 업로드 핸들러
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageUrl = event.target?.result as string;
+      setUploadedImage(imageUrl);
+      // TODO: AI 이미지 분석 및 섹션 자동 생성
+      analyzeImage(imageUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 이미지 분석 (placeholder)
+  const analyzeImage = async (_imageUrl: string) => {
+    setIsAnalyzing(true);
+    // TODO: 실제 AI 분석 API 연동
+    // 현재는 placeholder로 2초 후 메시지만 표시
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      alert('이미지 분석 기능은 준비 중입니다.\n수동으로 WOD를 구성해주세요.');
+    }, 2000);
+  };
+
+  // 이미지 제거
+  const removeImage = () => {
+    setUploadedImage(null);
+    setIsAnalyzing(false);
+  };
+
   // WOD 텍스트 생성 (미리보기)
   const generateWODText = () => {
     return sections.map(section => {
@@ -247,14 +302,42 @@ export default function WODStrategy() {
         section.movements.forEach(movement => {
           if (movement.name) {
             if (movement.isProgressive && movement.progressivePattern) {
-              text += `${movement.name} ${movement.progressivePattern}\n`;
+              text += `${movement.name} ${movement.progressivePattern}`;
+              if (movement.isScaled && movement.rxdWeight) {
+                text += ` @ ${movement.rxdWeight}${movement.weightUnit || 'lb'}`;
+              }
+              text += '\n';
             } else {
               const valueText = movement.type === 'calories'
                 ? `${movement.value} CAL`
                 : movement.type === 'distance'
                 ? `${movement.value}${movement.unit || 'm'}`
                 : movement.value;
-              text += `${valueText} ${movement.name}\n`;
+
+              // Rx 또는 Scaled 표시
+              if (movement.isScaled) {
+                // Rx 동작 표시
+                text += `${valueText} ${movement.name}`;
+                if (movement.rxdWeight) {
+                  text += ` @ ${movement.rxdWeight}${movement.weightUnit || 'lb'} (Rx)`;
+                }
+                text += '\n';
+
+                // Scaled 동작 표시
+                if (movement.scaledMovementName || movement.scaledWeight) {
+                  text += `  → Scaled: ${valueText} ${movement.scaledMovementName || movement.name}`;
+                  if (movement.scaledWeight) {
+                    const percentage = calculateWeightPercentage(movement.rxdWeight, movement.scaledWeight);
+                    text += ` @ ${movement.scaledWeight}${movement.weightUnit || 'lb'}`;
+                    if (percentage) {
+                      text += ` (${percentage}%)`;
+                    }
+                  }
+                  text += '\n';
+                }
+              } else {
+                text += `${valueText} ${movement.name}\n`;
+              }
             }
           }
         });
@@ -280,6 +363,46 @@ export default function WODStrategy() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 왼쪽: WOD 빌더 */}
         <div className="space-y-4">
+          {/* 이미지 업로드 */}
+          <div className="card p-4">
+            <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+              <Image className="w-4 h-4" />
+              이미지로 WOD 가져오기
+            </h3>
+
+            {!uploadedImage ? (
+              <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-light-border rounded-xl cursor-pointer hover:border-primary hover:bg-primary-light/10 transition-all">
+                <Upload className="w-8 h-8 text-text-tertiary mb-2" />
+                <span className="text-sm text-text-secondary mb-1">이미지를 클릭하거나 드래그하여 업로드</span>
+                <span className="text-xs text-text-tertiary">WOD 이미지를 자동으로 분석합니다</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+            ) : (
+              <div className="relative">
+                <img src={uploadedImage} alt="Uploaded WOD" className="w-full rounded-lg border border-light-border" />
+                <button
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
+                >
+                  <X className="w-4 h-4 text-red-500" />
+                </button>
+                {isAnalyzing && (
+                  <div className="absolute inset-0 bg-white/90 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-sm font-semibold text-text-primary">이미지 분석 중...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* 섹션 추가 버튼 */}
           <div className="card p-4">
             <h3 className="text-sm font-semibold text-text-primary mb-3">섹션 추가</h3>
@@ -488,6 +611,143 @@ export default function WODStrategy() {
                                   </div>
                                 )}
                               </div>
+
+                              {/* Rx/Scaled 토글 */}
+                              <div className="flex items-center gap-2 pt-1">
+                                <button
+                                  onClick={() => updateMovement(section.id, movement.id, { isScaled: false })}
+                                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                                    !movement.isScaled
+                                      ? 'bg-primary text-white'
+                                      : 'bg-light-bg text-text-tertiary hover:bg-light-card-hover'
+                                  }`}
+                                >
+                                  Rx
+                                </button>
+                                <button
+                                  onClick={() => updateMovement(section.id, movement.id, { isScaled: true })}
+                                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                                    movement.isScaled
+                                      ? 'bg-secondary text-white'
+                                      : 'bg-light-bg text-text-tertiary hover:bg-light-card-hover'
+                                  }`}
+                                >
+                                  Scaled
+                                </button>
+                              </div>
+
+                              {/* Scaled 옵션 */}
+                              {movement.isScaled && (
+                                <div className="space-y-2 pl-3 border-l-2 border-secondary/30">
+                                  {/* 동작 변경 옵션 */}
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      id={`scaled-movement-${movement.id}`}
+                                      checked={!!movement.scaledMovementName}
+                                      onChange={(e) => updateMovement(section.id, movement.id, {
+                                        scaledMovementName: e.target.checked ? '' : undefined
+                                      })}
+                                      className="rounded border-light-border"
+                                    />
+                                    <label htmlFor={`scaled-movement-${movement.id}`} className="text-xs text-text-secondary">
+                                      다른 동작으로 스케일
+                                    </label>
+                                  </div>
+
+                                  {/* 스케일 동작명 입력 */}
+                                  {movement.scaledMovementName !== undefined && (
+                                    <div className="relative">
+                                      <input
+                                        type="text"
+                                        value={movement.scaledMovementName}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          updateMovement(section.id, movement.id, { scaledMovementName: value });
+                                          // 자동완성 트리거
+                                          if (value.length >= 2) {
+                                            const filtered = CROSSFIT_MOVEMENTS.filter(m =>
+                                              m.toLowerCase().includes(value.toLowerCase())
+                                            ).slice(0, 5);
+                                            setMovementSuggestions({ ...movementSuggestions, [`scaled-${movement.id}`]: filtered });
+                                          } else {
+                                            const newSuggestions = { ...movementSuggestions };
+                                            delete newSuggestions[`scaled-${movement.id}`];
+                                            setMovementSuggestions(newSuggestions);
+                                          }
+                                        }}
+                                        placeholder="스케일 동작명 (예: Pull-up)"
+                                        className="w-full px-3 py-2 rounded-lg border border-light-border text-sm bg-secondary-light/10"
+                                      />
+                                      {movementSuggestions[`scaled-${movement.id}`] && movementSuggestions[`scaled-${movement.id}`].length > 0 && (
+                                        <div className="absolute z-10 w-full mt-1 bg-white border border-light-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                          {movementSuggestions[`scaled-${movement.id}`].map((suggestion, idx) => (
+                                            <button
+                                              key={idx}
+                                              onClick={() => {
+                                                updateMovement(section.id, movement.id, { scaledMovementName: suggestion });
+                                                const newSuggestions = { ...movementSuggestions };
+                                                delete newSuggestions[`scaled-${movement.id}`];
+                                                setMovementSuggestions(newSuggestions);
+                                              }}
+                                              className="w-full px-3 py-2 text-left text-sm hover:bg-primary-light transition-colors"
+                                            >
+                                              {suggestion}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* 무게 설정 */}
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-text-tertiary min-w-[50px]">RxD:</span>
+                                      <input
+                                        type="number"
+                                        value={movement.rxdWeight || ''}
+                                        onChange={(e) => updateMovement(section.id, movement.id, {
+                                          rxdWeight: parseFloat(e.target.value) || undefined
+                                        })}
+                                        placeholder="135"
+                                        className="w-20 px-2 py-1 rounded-lg border border-light-border text-sm"
+                                      />
+                                      <select
+                                        value={movement.weightUnit || 'lb'}
+                                        onChange={(e) => updateMovement(section.id, movement.id, {
+                                          weightUnit: e.target.value as 'lb' | 'kg'
+                                        })}
+                                        className="px-2 py-1 rounded-lg border border-light-border text-xs"
+                                      >
+                                        <option value="lb">lb</option>
+                                        <option value="kg">kg</option>
+                                      </select>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-text-tertiary min-w-[50px]">Scaled:</span>
+                                      <input
+                                        type="number"
+                                        value={movement.scaledWeight || ''}
+                                        onChange={(e) => updateMovement(section.id, movement.id, {
+                                          scaledWeight: parseFloat(e.target.value) || undefined
+                                        })}
+                                        placeholder="95"
+                                        className="w-20 px-2 py-1 rounded-lg border border-light-border text-sm"
+                                      />
+                                      <span className="text-xs text-text-tertiary">{movement.weightUnit || 'lb'}</span>
+                                      {(() => {
+                                        const percentage = calculateWeightPercentage(movement.rxdWeight, movement.scaledWeight);
+                                        return percentage ? (
+                                          <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${getPercentageColor(percentage)}`}>
+                                            {percentage}%
+                                          </span>
+                                        ) : null;
+                                      })()}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
 
                               {/* 누적 패턴 체크박스 */}
                               <div className="flex items-center gap-2">
