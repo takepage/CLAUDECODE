@@ -291,66 +291,69 @@ export const ATTENDANCE_DAYS = [
   "2024-12-18"
 ];
 
-// 체중 추이 (최근 3개월)
+// 체중 추이 (최근 2개월 - 2024.11.17 계정 시작)
 export const WEIGHT_TREND = [
-  { date: "2024-10-17", weight: 105 },
-  { date: "2024-10-24", weight: 104.5 },
-  { date: "2024-10-31", weight: 104 },
-  { date: "2024-11-07", weight: 103.5 },
-  { date: "2024-11-14", weight: 103 },
-  { date: "2024-11-21", weight: 102.5 },
-  { date: "2024-11-28", weight: 102 },
-  { date: "2024-12-05", weight: 101.5 },
-  { date: "2024-12-12", weight: 101 },
-  { date: "2024-12-19", weight: 100.5 },
-  { date: "2024-12-26", weight: 100 },
-  { date: "2025-01-02", weight: 100.2 },
-  { date: "2025-01-09", weight: 100.1 },
+  { date: "2024-11-17", weight: 105 },
+  { date: "2024-11-24", weight: 104 },
+  { date: "2024-12-01", weight: 103 },
+  { date: "2024-12-08", weight: 102 },
+  { date: "2024-12-15", weight: 101.5 },
+  { date: "2024-12-22", weight: 101 },
+  { date: "2024-12-29", weight: 100.5 },
+  { date: "2025-01-05", weight: 100.2 },
+  { date: "2025-01-12", weight: 100.1 },
   { date: "2025-01-16", weight: 100.0 }
 ];
 
-// 1RM 추이 (최근 6개월) - 계정 시작일: 2024-07-17
+// 1RM 추이 (최근 2개월) - 계정 시작일: 2024-11-17
 export const DEADLIFT_1RM_TREND = [
-  { date: "2024-07-17", weight: 185 },
-  { date: "2024-08-17", weight: 190 },
-  { date: "2024-09-17", weight: 195 },
-  { date: "2024-10-17", weight: 198 },
-  { date: "2024-11-17", weight: 202 },
-  { date: "2024-12-20", weight: 206 }
+  { date: "2024-11-17", weight: 195 },
+  { date: "2024-11-24", weight: 198 },
+  { date: "2024-12-01", weight: 200 },
+  { date: "2024-12-08", weight: 202 },
+  { date: "2024-12-15", weight: 204 },
+  { date: "2024-12-22", weight: 205 },
+  { date: "2024-12-29", weight: 206 }
 ];
 
 export const CLEAN_AND_JERK_1RM_TREND = [
-  { date: "2024-07-17", weight: 110 },
-  { date: "2024-08-17", weight: 113 },
-  { date: "2024-09-17", weight: 117 },
-  { date: "2024-10-17", weight: 120 },
-  { date: "2024-11-17", weight: 122 },
-  { date: "2024-12-10", weight: 125 }
+  { date: "2024-11-17", weight: 117 },
+  { date: "2024-11-24", weight: 119 },
+  { date: "2024-12-01", weight: 120 },
+  { date: "2024-12-08", weight: 122 },
+  { date: "2024-12-15", weight: 123 },
+  { date: "2024-12-22", weight: 124 },
+  { date: "2024-12-29", weight: 125 }
 ];
 
 export const SNATCH_1RM_TREND = [
-  { date: "2024-07-17", weight: 82 },
-  { date: "2024-08-17", weight: 85 },
-  { date: "2024-09-17", weight: 87 },
-  { date: "2024-10-17", weight: 89 },
-  { date: "2024-11-15", weight: 93 }
+  { date: "2024-11-17", weight: 87 },
+  { date: "2024-11-24", weight: 89 },
+  { date: "2024-12-01", weight: 90 },
+  { date: "2024-12-08", weight: 91 },
+  { date: "2024-12-15", weight: 92 },
+  { date: "2024-12-22", weight: 92 },
+  { date: "2024-12-29", weight: 93 }
 ];
 
 export const BACK_SQUAT_1RM_TREND = [
-  { date: "2024-07-17", weight: 135 },
-  { date: "2024-08-17", weight: 138 },
-  { date: "2024-09-17", weight: 141 },
-  { date: "2024-10-17", weight: 143 },
-  { date: "2024-11-17", weight: 145 },
-  { date: "2024-12-05", weight: 147 }
+  { date: "2024-11-17", weight: 141 },
+  { date: "2024-11-24", weight: 143 },
+  { date: "2024-12-01", weight: 144 },
+  { date: "2024-12-08", weight: 145 },
+  { date: "2024-12-15", weight: 146 },
+  { date: "2024-12-22", weight: 146 },
+  { date: "2024-12-29", weight: 147 }
 ];
 
 export const SHOULDER_PRESS_1RM_TREND = [
-  { date: "2024-07-17", weight: 68 },
-  { date: "2024-08-17", weight: 70 },
-  { date: "2024-09-17", weight: 72 },
-  { date: "2024-10-17", weight: 74 },
-  { date: "2024-11-10", weight: 77 }
+  { date: "2024-11-17", weight: 72 },
+  { date: "2024-11-24", weight: 73 },
+  { date: "2024-12-01", weight: 74 },
+  { date: "2024-12-08", weight: 75 },
+  { date: "2024-12-15", weight: 76 },
+  { date: "2024-12-22", weight: 76 },
+  { date: "2024-12-29", weight: 77 }
 ];
 
 // WOD 전략 분석 예시 (실제 이딱복님에게 맞춤)

@@ -88,7 +88,7 @@ export default function OneRMTrendChart() {
           <div className="flex items-center gap-2">
             <div>
               <h3 className="text-xl font-bold text-text-primary">추이 분석</h3>
-              <p className="text-sm text-text-secondary">2024.07.17부터 기록 중</p>
+              <p className="text-sm text-text-secondary">2024.11.17부터 기록 중</p>
             </div>
             <TooltipComponent content="탭을 클릭하여 다른 지표를 확인하세요" />
           </div>
@@ -233,7 +233,7 @@ export default function OneRMTrendChart() {
       {selectedTrend === 'weight' && (
         <div className="mt-6 grid grid-cols-2 gap-4">
           <div className={`p-4 rounded-xl ${weightChangeData.isPositive ? 'bg-primary-light' : 'bg-accent-orange/10'}`}>
-            <div className="text-xs text-text-secondary mb-1 font-semibold">3개월 변화</div>
+            <div className="text-xs text-text-secondary mb-1 font-semibold">2개월 변화</div>
             <div className={`text-3xl font-bold ${weightChangeData.isPositive ? 'text-primary' : 'text-accent-orange'}`}>
               {weightChangeData.isPositive ? '-' : '+'}{weightChangeData.change.toFixed(1)}kg
             </div>
