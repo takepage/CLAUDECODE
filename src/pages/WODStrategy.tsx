@@ -1,5 +1,60 @@
 import { useState } from 'react';
-import { Sparkles, Plus, Trash2, Copy, Clock, Zap, Timer, Target, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Plus, Trash2, Copy, Clock, Zap, Timer, Target, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
+
+// 크로스핏 동작 리스트 (자동완성용)
+const CROSSFIT_MOVEMENTS = [
+  'Pull-up',
+  'Strict Pull-up',
+  'Kipping Pull-up',
+  'Chest to Bar',
+  'Strict Chest to Bar',
+  'Hand Stand Push Up',
+  'Strict Hand Stand Push Up',
+  'Kipping Hand Stand Push Up',
+  'HSPU',
+  'Strict HSPU',
+  'Push-up',
+  'Strict Push-up',
+  'Ring Dip',
+  'Strict Ring Dip',
+  'Bar Muscle Up',
+  'Ring Muscle Up',
+  'Toes to Bar',
+  'Knees to Elbow',
+  'Air Squat',
+  'Box Jump',
+  'Burpee',
+  'Double Under',
+  'Single Under',
+  'Row',
+  'Ski Erg',
+  'Assault Bike',
+  'Thruster',
+  'Wall Ball',
+  'Deadlift',
+  'Clean',
+  'Power Clean',
+  'Squat Clean',
+  'Clean & Jerk',
+  'Snatch',
+  'Power Snatch',
+  'Squat Snatch',
+  'Front Squat',
+  'Back Squat',
+  'Overhead Squat',
+  'Shoulder Press',
+  'Push Press',
+  'Push Jerk',
+  'Split Jerk',
+  'Bench Press',
+  'Sumo Deadlift High Pull',
+  'Kettlebell Swing',
+  'Turkish Get Up',
+  'Farmer Carry',
+  'Sled Push',
+  'Sled Pull',
+  'Devil Press'
+];
 
 // 데이터 타입 정의
 interface Movement {
@@ -17,6 +72,7 @@ interface Section {
   type: 'AMRAP' | 'FOR_TIME' | 'EMOM' | 'REST';
   duration?: number;
   rounds?: number;
+  interval?: number; // EMOM 간격 (분)
   timecap?: number;
   movements: Movement[];
 }
@@ -24,6 +80,8 @@ interface Section {
 export default function WODStrategy() {
   const [sections, setSections] = useState<Section[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [draggedSection, setDraggedSection] = useState<string | null>(null);
+  const [movementSuggestions, setMovementSuggestions] = useState<{ [key: string]: string[] }>({});
 
   // 섹션 추가
   const addSection = (type: Section['type']) => {
@@ -32,6 +90,7 @@ export default function WODStrategy() {
       type,
       duration: type === 'AMRAP' ? 5 : type === 'REST' ? 3 : undefined,
       rounds: type === 'EMOM' ? 10 : undefined,
+      interval: type === 'EMOM' ? 1 : undefined, // EMOM 기본 1분
       timecap: type === 'FOR_TIME' ? 20 : undefined,
       movements: []
     };
@@ -66,6 +125,32 @@ export default function WODStrategy() {
   // 섹션 업데이트
   const updateSection = (sectionId: string, updates: Partial<Section>) => {
     setSections(sections.map(s => s.id === sectionId ? { ...s, ...updates } : s));
+  };
+
+  // 드래그 앤 드롭
+  const handleDragStart = (e: React.DragEvent, sectionId: string) => {
+    setDraggedSection(sectionId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetSectionId: string) => {
+    e.preventDefault();
+    if (!draggedSection || draggedSection === targetSectionId) return;
+
+    const draggedIndex = sections.findIndex(s => s.id === draggedSection);
+    const targetIndex = sections.findIndex(s => s.id === targetSectionId);
+
+    const newSections = [...sections];
+    const [removed] = newSections.splice(draggedIndex, 1);
+    newSections.splice(targetIndex, 0, removed);
+
+    setSections(newSections);
+    setDraggedSection(null);
   };
 
   // 동작 추가
@@ -107,6 +192,29 @@ export default function WODStrategy() {
     ));
   };
 
+  // 동작 자동완성
+  const handleMovementNameChange = (sectionId: string, movementId: string, value: string) => {
+    updateMovement(sectionId, movementId, { name: value });
+
+    if (value.length >= 2) {
+      const filtered = CROSSFIT_MOVEMENTS.filter(m =>
+        m.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5);
+      setMovementSuggestions({ ...movementSuggestions, [movementId]: filtered });
+    } else {
+      const newSuggestions = { ...movementSuggestions };
+      delete newSuggestions[movementId];
+      setMovementSuggestions(newSuggestions);
+    }
+  };
+
+  const selectSuggestion = (sectionId: string, movementId: string, suggestion: string) => {
+    updateMovement(sectionId, movementId, { name: suggestion });
+    const newSuggestions = { ...movementSuggestions };
+    delete newSuggestions[movementId];
+    setMovementSuggestions(newSuggestions);
+  };
+
   // 섹션 확장/축소
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
@@ -132,7 +240,7 @@ export default function WODStrategy() {
         } else if (section.type === 'FOR_TIME') {
           text = `FOR TIME${section.timecap ? ` (${section.timecap}min cap)` : ''}\n`;
         } else if (section.type === 'EMOM') {
-          text = `EMOM ${section.rounds || 10}\n`;
+          text = `EMOM ${section.rounds || 10}${section.interval && section.interval > 1 ? ` (Every ${section.interval}min)` : ''}\n`;
         }
 
         // 동작 추가
@@ -221,23 +329,33 @@ export default function WODStrategy() {
               const isRest = section.type === 'REST';
 
               return (
-                <div key={section.id} className="card">
+                <div
+                  key={section.id}
+                  className="card relative"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, section.id)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, section.id)}
+                >
+                  {/* 섹션 번호 (왼쪽 상단) */}
+                  <div className="absolute top-3 left-3 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
+                    {index + 1}
+                  </div>
+
                   {/* 섹션 헤더 */}
                   <div className="p-4 border-b border-light-border">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
+                      <div className="flex items-center gap-3 flex-1 ml-8">
+                        {/* 드래그 핸들 */}
                         <button
-                          onClick={() => toggleSection(section.id)}
-                          className="p-1 hover:bg-light-bg rounded-lg transition-colors"
+                          className="p-1 hover:bg-light-bg rounded-lg transition-colors cursor-move"
+                          title="드래그하여 순서 변경"
                         >
-                          {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-text-tertiary" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-text-tertiary" />
-                          )}
+                          <GripVertical className="w-5 h-5 text-text-tertiary" />
                         </button>
+
                         <span className="font-bold text-text-primary">
-                          #{index + 1} {section.type}
+                          {section.type}
                         </span>
 
                         {/* 시간 입력 */}
@@ -270,6 +388,15 @@ export default function WODStrategy() {
                             )}
                             {section.type === 'EMOM' && (
                               <>
+                                <span className="text-xs text-text-tertiary">Every</span>
+                                <input
+                                  type="number"
+                                  value={section.interval || ''}
+                                  onChange={(e) => updateSection(section.id, { interval: parseInt(e.target.value) || 1 })}
+                                  className="w-12 px-2 py-1 rounded-lg border border-light-border text-sm"
+                                  placeholder="1"
+                                />
+                                <span className="text-xs text-text-tertiary">분 x</span>
                                 <input
                                   type="number"
                                   value={section.rounds || ''}
@@ -313,6 +440,17 @@ export default function WODStrategy() {
                         >
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </button>
+                        <button
+                          onClick={() => toggleSection(section.id)}
+                          className="p-2 hover:bg-light-bg rounded-lg transition-colors"
+                          title={isExpanded ? "접기" : "펼치기"}
+                        >
+                          {isExpanded ? (
+                            <ChevronUp className="w-5 h-5 text-text-tertiary" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-text-tertiary" />
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -325,15 +463,31 @@ export default function WODStrategy() {
                         <div key={movement.id} className="p-3 rounded-xl bg-light-bg border border-light-border">
                           <div className="flex items-start gap-2">
                             <span className="text-xs font-bold text-text-tertiary mt-2">{mIndex + 1}</span>
-                            <div className="flex-1 space-y-2">
+                            <div className="flex-1 space-y-2 relative">
                               {/* 동작명 */}
-                              <input
-                                type="text"
-                                value={movement.name}
-                                onChange={(e) => updateMovement(section.id, movement.id, { name: e.target.value })}
-                                placeholder="동작 이름 (예: Pull-up, Row)"
-                                className="w-full px-3 py-2 rounded-lg border border-light-border text-sm"
-                              />
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={movement.name}
+                                  onChange={(e) => handleMovementNameChange(section.id, movement.id, e.target.value)}
+                                  placeholder="동작 이름 (예: Pull-up, Row)"
+                                  className="w-full px-3 py-2 rounded-lg border border-light-border text-sm"
+                                />
+                                {/* 자동완성 드롭다운 */}
+                                {movementSuggestions[movement.id] && movementSuggestions[movement.id].length > 0 && (
+                                  <div className="absolute z-10 w-full mt-1 bg-white border border-light-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    {movementSuggestions[movement.id].map((suggestion, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => selectSuggestion(section.id, movement.id, suggestion)}
+                                        className="w-full px-3 py-2 text-left text-sm hover:bg-primary-light transition-colors"
+                                      >
+                                        {suggestion}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
 
                               {/* 누적 패턴 체크박스 */}
                               <div className="flex items-center gap-2">
@@ -428,7 +582,7 @@ export default function WODStrategy() {
                 <p className="text-text-tertiary text-sm">WOD를 구성하면 여기에 표시됩니다</p>
               </div>
             ) : (
-              <pre className="text-sm text-text-primary whitespace-pre-wrap bg-light-bg p-4 rounded-xl border border-light-border font-mono">
+              <pre className="text-sm text-text-primary whitespace-pre-wrap bg-light-bg p-4 rounded-xl border border-light-border font-sans">
                 {generateWODText()}
               </pre>
             )}
