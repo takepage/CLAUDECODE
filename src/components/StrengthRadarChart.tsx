@@ -22,7 +22,6 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
 
   // 선수 유형 정보
   const athleteType = STRENGTH_ANALYSIS.athleteType;
-  const athleteEmoji = STRENGTH_ANALYSIS.athleteEmoji;
   const topCategory = STRENGTH_ANALYSIS.topCategory;
   const typeExplanation = STRENGTH_ANALYSIS.typeExplanation;
 
@@ -61,10 +60,12 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
   };
 
   return (
-    <div className="card card-hover p-6">
-      <div className="mb-6">
-        <h3 className="text-xl font-bold text-text-primary mb-1">강점/약점 분석</h3>
-        <p className="text-sm text-text-secondary">6가지 영역으로 보는 내 능력치</p>
+    <div className="card p-6">
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h3 className="text-xl font-bold text-text-primary mb-1">퍼포먼스 그래프</h3>
+          <p className="text-sm text-text-secondary">6가지 영역으로 보는 내 능력치</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -129,19 +130,18 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
         {/* AI Analysis Comment */}
         <div className="lg:col-span-1 space-y-4">
           {/* 운동 타입 배지 */}
-          <div className="p-5 rounded-xl bg-gradient-to-br from-primary to-secondary text-white">
+          <div className="p-4 rounded-xl bg-primary text-white">
             <div className="flex items-center gap-2 mb-2">
-              <Award className="w-5 h-5" />
-              <h4 className="font-semibold">선수 유형</h4>
+              <Award className="w-4 h-4" />
+              <h4 className="text-sm font-semibold">선수 유형</h4>
             </div>
-            <div className="text-3xl font-bold mt-2 flex items-center gap-2">
-              <span>{athleteType}</span>
-              <span className="text-4xl">{athleteEmoji}</span>
+            <div className="text-xl font-bold mt-2">
+              {athleteType}
             </div>
-            <div className="text-sm opacity-90 mt-3 leading-relaxed">
+            <div className="text-xs opacity-90 mt-2 leading-relaxed">
               {typeExplanation}
             </div>
-            <div className="text-sm opacity-80 mt-3 pt-3 border-t border-white/20">
+            <div className="text-xs opacity-80 mt-2 pt-2 border-t border-white/20">
               {topCategory} 특화 • 평균 {averageScore}/10
             </div>
           </div>

@@ -202,7 +202,7 @@ export default function Dashboard() {
     <div className="space-y-6 pb-8">
       {/* 데일리 인사이트 카드 - 모바일에서 더 작고 깔끔하게 */}
       {topInsight && (
-        <div className={`card p-3 md:p-4 ${getInsightStyle(topInsight.type)}`}>
+        <div className={`p-3 md:p-4 rounded-2xl shadow-sm ${getInsightStyle(topInsight.type)}`}>
           <div className="flex items-start gap-2 md:gap-3">
             <Zap className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
@@ -316,7 +316,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-7 gap-1">
               {monthCalendarDays.map((date, index) => {
                 if (!date) {
-                  return <div key={`empty-${index}`} className="aspect-square" />;
+                  return <div key={`empty-${index}`} className="aspect-square md:aspect-auto md:h-8" />;
                 }
 
                 const dateString = date.toISOString().split('T')[0];
@@ -326,7 +326,7 @@ export default function Dashboard() {
                   <div
                     key={index}
                     onClick={() => isAttended && handleDateClick(dateString)}
-                    className={`aspect-square flex items-center justify-center text-xs rounded-lg transition-all ${
+                    className={`aspect-square md:aspect-auto md:h-8 flex items-center justify-center text-xs rounded-lg transition-all ${
                       isAttended
                         ? 'bg-primary text-white font-bold cursor-pointer hover:bg-primary/80 hover:scale-110'
                         : 'bg-light-bg text-text-tertiary'
@@ -390,7 +390,7 @@ export default function Dashboard() {
 
       {/* 최근 활동 */}
       <div className="card p-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-start justify-between mb-4">
           <h3 className="text-lg font-bold text-text-primary">최근 활동</h3>
           <button
             onClick={() => navigate('/logbook')}

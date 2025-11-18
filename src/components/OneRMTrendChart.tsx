@@ -79,20 +79,18 @@ export default function OneRMTrendChart() {
   const weightChangeData = calculateWeightChange();
 
   return (
-    <div className="card card-hover p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="card p-6">
+      <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-primary-light">
             <TrendingUp className="w-6 h-6 text-primary" />
           </div>
-          <div className="flex items-center gap-2">
-            <div>
-              <h3 className="text-xl font-bold text-text-primary">추이 분석</h3>
-              <p className="text-sm text-text-secondary">2024.11.17부터 기록 중</p>
-            </div>
-            <TooltipComponent content="탭을 클릭하여 다른 지표를 확인하세요" />
+          <div>
+            <h3 className="text-xl font-bold text-text-primary">타임라인</h3>
+            <p className="text-sm text-text-secondary">2024.11.17부터 기록 중</p>
           </div>
         </div>
+        <TooltipComponent content="탭을 클릭하여 다른 지표를 확인하세요" />
 
         {/* 탭 메뉴 */}
         <div className="flex gap-2 bg-light-bg p-1 rounded-xl">
