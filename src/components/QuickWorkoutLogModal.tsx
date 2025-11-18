@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Dumbbell, Users, Check } from 'lucide-react';
+import { X, Dumbbell, Users, Check, Smile, Meh, Frown } from 'lucide-react';
 
 interface QuickWorkoutLogModalProps {
   isOpen: boolean;
@@ -72,7 +72,7 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-2xl font-bold text-text-primary">운동 완료! 🎉</h3>
+            <h3 className="text-2xl font-bold text-text-primary">운동 완료!</h3>
             <p className="text-sm text-text-secondary mt-1">
               박스 체류 시간: <span className="font-semibold text-primary">{formatDuration(duration)}</span>
             </p>
@@ -171,21 +171,21 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
             </label>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { value: 'good', emoji: '😊', label: '좋음' },
-                { value: 'normal', emoji: '😐', label: '보통' },
-                { value: 'bad', emoji: '😓', label: '안좋음' }
+                { value: 'good', Icon: Smile, label: '좋음' },
+                { value: 'normal', Icon: Meh, label: '보통' },
+                { value: 'bad', Icon: Frown, label: '안좋음' }
               ].map((f) => (
                 <button
                   key={f.value}
                   onClick={() => setFeeling(f.value as any)}
                   className={`p-3 rounded-xl border-2 transition-all ${
                     feeling === f.value
-                      ? 'border-primary bg-primary-light'
-                      : 'border-light-border bg-white hover:border-primary/30'
+                      ? 'border-primary bg-primary-light text-primary'
+                      : 'border-light-border bg-white text-text-secondary hover:border-primary/30'
                   }`}
                 >
-                  <div className="text-3xl mb-1">{f.emoji}</div>
-                  <div className="text-xs font-semibold text-text-primary">{f.label}</div>
+                  <f.Icon className="w-8 h-8 mx-auto mb-2" />
+                  <div className="text-xs font-semibold">{f.label}</div>
                 </button>
               ))}
             </div>
