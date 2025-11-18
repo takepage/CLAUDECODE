@@ -158,15 +158,15 @@ export default function Dashboard() {
   const getInsightStyle = (type: string) => {
     switch (type) {
       case 'pr':
-        return 'bg-primary-light text-primary border border-primary/20';
+        return 'bg-[#EFF7EE] text-primary border border-primary/20';
       case 'fact':
-        return 'bg-secondary-light text-secondary border border-secondary/20';
+        return 'bg-[#EFF7EE] text-secondary border border-secondary/20';
       case 'reminder':
-        return 'bg-accent-purple/10 text-accent-purple border border-accent-purple/20';
+        return 'bg-[#EFF7EE] text-accent-purple border border-accent-purple/20';
       case 'goal':
-        return 'bg-primary-light text-primary border border-primary/20';
+        return 'bg-[#EFF7EE] text-primary border border-primary/20';
       default:
-        return 'bg-light-bg text-text-primary border border-light-border';
+        return 'bg-[#EFF7EE] text-text-primary border border-light-border';
     }
   };
 
@@ -365,7 +365,7 @@ export default function Dashboard() {
                   <div
                     key={index}
                     onClick={() => isAttended && handleDateClick(dateString)}
-                    className={`aspect-square flex items-center justify-center text-sm rounded-xl font-semibold transition-all ${
+                    className={`h-10 flex items-center justify-center text-sm rounded-xl font-semibold transition-all ${
                       isAttended
                         ? 'bg-primary text-white shadow-md cursor-pointer hover:bg-primary/80 hover:scale-110'
                         : isToday
