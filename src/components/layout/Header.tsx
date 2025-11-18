@@ -95,7 +95,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   return (
     <header className="bg-bg-card border-b border-light-border sticky top-0 z-30">
-      <div className="px-4 md:px-6 lg:px-8 py-3 md:py-4">
+      <div className="px-4 md:px-6 lg:px-8 py-4 md:py-5">
         <div className="flex items-center justify-between gap-2">
           {/* Left Section */}
           <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
@@ -108,23 +108,23 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <Menu className="w-6 h-6 text-text-secondary" />
             </button>
 
-            {/* LIVE Button */}
+            {/* LIVE Button - 모바일에서 크게 */}
             <button
               onClick={handleLiveToggle}
-              className={`flex items-center gap-2 px-3 md:px-6 py-2 md:py-3 rounded-xl font-semibold transition-all text-sm md:text-base min-w-0 flex-shrink ${
+              className={`flex items-center gap-2 md:gap-3 px-5 py-3 md:px-8 md:py-4 rounded-xl font-bold transition-all text-base md:text-lg min-w-0 flex-shrink-0 shadow-md ${
                 isLive
                   ? 'bg-danger text-white shadow-lg animate-pulse'
-                  : 'bg-primary text-white hover:shadow-md active:scale-95'
+                  : 'bg-primary text-white hover:shadow-lg active:scale-95'
               }`}
             >
-              <Radio className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+              <Radio className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
               {isLive ? (
                 <div className="flex items-center gap-1 md:gap-2 min-w-0">
-                  <span className="hidden sm:inline">LIVE</span>
-                  <span className="text-xs md:text-sm font-mono truncate">{formatTime(liveTime)}</span>
+                  <span className="inline">LIVE</span>
+                  <span className="text-sm md:text-base font-mono truncate">{formatTime(liveTime)}</span>
                 </div>
               ) : (
-                <span className="hidden sm:inline">운동 시작</span>
+                <span className="inline">운동 시작</span>
               )}
             </button>
 

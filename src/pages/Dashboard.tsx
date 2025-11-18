@@ -158,13 +158,13 @@ export default function Dashboard() {
   const getInsightStyle = (type: string) => {
     switch (type) {
       case 'pr':
-        return 'bg-gradient-to-br from-warning to-accent-orange text-white';
+        return 'bg-primary text-white';
       case 'fact':
-        return 'bg-gradient-to-br from-primary to-secondary text-white';
+        return 'bg-secondary text-white';
       case 'reminder':
-        return 'bg-gradient-to-br from-secondary to-accent-purple text-white';
+        return 'bg-accent-purple text-white';
       case 'goal':
-        return 'bg-gradient-to-br from-accent-purple to-accent-pink text-white';
+        return 'bg-primary text-white';
       default:
         return 'bg-primary-light text-primary';
     }
@@ -200,44 +200,44 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* 데일리 인사이트 카드 */}
+      {/* 데일리 인사이트 카드 - 모바일에서 더 작고 깔끔하게 */}
       {topInsight && (
-        <div className={`card p-5 ${getInsightStyle(topInsight.type)}`}>
-          <div className="flex items-start gap-3">
-            <Zap className="w-6 h-6 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-medium opacity-80 mb-1">Today's Insight</p>
-              <p className="text-lg font-bold leading-snug">{topInsight.message}</p>
+        <div className={`card p-3 md:p-4 ${getInsightStyle(topInsight.type)}`}>
+          <div className="flex items-start gap-2 md:gap-3">
+            <Zap className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs md:text-sm font-medium opacity-80 mb-0.5">Today's Insight</p>
+              <p className="text-sm md:text-base font-bold leading-snug">{topInsight.message}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* 주요 액션 버튼 */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         <button
-          onClick={() => navigate('/live')}
-          className="card card-hover p-6 flex flex-col items-center justify-center gap-3 min-h-[140px] bg-primary text-white active:scale-95 transition-transform"
+          onClick={() => navigate('/wod-strategy')}
+          className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 md:gap-3 min-h-[120px] md:min-h-[140px] bg-primary text-white rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all"
         >
-          <div className="p-4 rounded-2xl bg-white/20">
-            <Timer className="w-8 h-8" />
+          <div className="p-3 md:p-4 rounded-2xl bg-white/20">
+            <Timer className="w-6 h-6 md:w-8 md:h-8" />
           </div>
           <div className="text-center">
-            <h3 className="text-xl font-bold">타이머</h3>
-            <p className="text-sm opacity-90 mt-1">운동 시작하기</p>
+            <h3 className="text-lg md:text-xl font-bold">타이머</h3>
+            <p className="text-xs md:text-sm opacity-90 mt-1">운동 시작하기</p>
           </div>
         </button>
 
         <button
           onClick={() => navigate('/logbook')}
-          className="card card-hover p-6 flex flex-col items-center justify-center gap-3 min-h-[140px] bg-secondary text-white active:scale-95 transition-transform"
+          className="p-4 md:p-6 flex flex-col items-center justify-center gap-2 md:gap-3 min-h-[120px] md:min-h-[140px] bg-secondary text-white rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all"
         >
-          <div className="p-4 rounded-2xl bg-white/20">
-            <Plus className="w-8 h-8" />
+          <div className="p-3 md:p-4 rounded-2xl bg-white/20">
+            <Plus className="w-6 h-6 md:w-8 md:h-8" />
           </div>
           <div className="text-center">
-            <h3 className="text-xl font-bold">빠른 기록</h3>
-            <p className="text-sm opacity-90 mt-1">운동 기록하기</p>
+            <h3 className="text-lg md:text-xl font-bold">빠른 기록</h3>
+            <p className="text-xs md:text-sm opacity-90 mt-1">운동 기록하기</p>
           </div>
         </button>
       </div>
