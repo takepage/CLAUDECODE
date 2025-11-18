@@ -1,10 +1,14 @@
 import { Bell, Radio } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Tooltip from '../Tooltip';
+import QuickWorkoutLogModal from '../QuickWorkoutLogModal';
+import type { WorkoutLogData } from '../QuickWorkoutLogModal';
 
 export default function Header() {
   const [isLive, setIsLive] = useState(false);
   const [liveTime, setLiveTime] = useState(0);
+  const [showWorkoutLogModal, setShowWorkoutLogModal] = useState(false);
+  const [savedDuration, setSavedDuration] = useState(0);
 
   useEffect(() => {
     let interval: number;
@@ -27,31 +31,43 @@ export default function Header() {
 
   const handleLiveToggle = () => {
     if (isLive) {
-      // LIVE 종료 - 출석 체크 및 운동 시간 저장
-      const today = new Date().toISOString().split('T')[0];
-      const workoutData = {
-        date: today,
-        duration: liveTime,
-        timestamp: Date.now(),
-      };
-
-      // localStorage에 저장
-      const existingData = localStorage.getItem('workoutHistory');
-      const workoutHistory = existingData ? JSON.parse(existingData) : [];
-      workoutHistory.push(workoutData);
-      localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-
-      // 출석 날짜 저장
-      const attendanceData = localStorage.getItem('attendanceDays');
-      const attendanceDays = attendanceData ? JSON.parse(attendanceData) : [];
-      if (!attendanceDays.includes(today)) {
-        attendanceDays.push(today);
-        localStorage.setItem('attendanceDays', JSON.stringify(attendanceDays));
-      }
-
-      alert(`✅ 운동 완료!\n박스 체류 시간: ${formatTime(liveTime)}\n출석이 자동으로 기록되었습니다.`);
+      // LIVE 종료 - 운동 기록 모달 표시
+      setSavedDuration(liveTime);
+      setShowWorkoutLogModal(true);
+      setIsLive(false);
+    } else {
+      // LIVE 시작
+      setIsLive(true);
     }
-    setIsLive(!isLive);
+  };
+
+  const handleWorkoutSave = (data: WorkoutLogData) => {
+    const today = new Date().toISOString().split('T')[0];
+
+    // 운동 상세 정보 저장
+    const workoutData = {
+      date: today,
+      duration: savedDuration,
+      timestamp: Date.now(),
+      ...data
+    };
+
+    // localStorage에 저장
+    const existingData = localStorage.getItem('workoutHistory');
+    const workoutHistory = existingData ? JSON.parse(existingData) : [];
+    workoutHistory.push(workoutData);
+    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+    // 출석 날짜 저장
+    const attendanceData = localStorage.getItem('attendanceDays');
+    const attendanceDays = attendanceData ? JSON.parse(attendanceData) : [];
+    if (!attendanceDays.includes(today)) {
+      attendanceDays.push(today);
+      localStorage.setItem('attendanceDays', JSON.stringify(attendanceDays));
+    }
+
+    // 성공 메시지
+    alert(`✅ 운동 기록 완료!\n박스 체류 시간: ${formatTime(savedDuration)}\n출석이 자동으로 기록되었습니다.`);
   };
 
   return (
@@ -105,6 +121,14 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      {/* 운동 기록 모달 */}
+      <QuickWorkoutLogModal
+        isOpen={showWorkoutLogModal}
+        onClose={() => setShowWorkoutLogModal(false)}
+        onSave={handleWorkoutSave}
+        duration={savedDuration}
+      />
     </header>
   );
 }

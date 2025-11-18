@@ -102,9 +102,12 @@ export const RECENT_WODS = [
     date: "2025-01-16",
     wodName: "Heavy DT",
     wodType: "FOR TIME",
+    classType: "class" as const,
+    category: "wod" as const,
     time: "15:23",
     rxd: true,
-    feeling: "good",
+    feeling: "good" as const,
+    duration: 5400, // 90분
     movements: [
       { name: "Deadlift", weight: 80, reps: 12, unit: "kg" },
       { name: "Hang Power Clean", weight: 80, reps: 9, unit: "kg" },
@@ -118,9 +121,12 @@ export const RECENT_WODS = [
     date: "2025-01-15",
     wodName: "Shoulder Burner",
     wodType: "AMRAP",
+    classType: "class" as const,
+    category: "gymnastics" as const,
     rounds: 8,
     rxd: true,
-    feeling: "bad",
+    feeling: "bad" as const,
+    duration: 4200, // 70분
     movements: [
       { name: "HSPU", reps: 10 },
       { name: "KB Swing", weight: 24, reps: 15, unit: "kg" },
@@ -134,9 +140,12 @@ export const RECENT_WODS = [
     date: "2025-01-14",
     wodName: "Deadlift Party",
     wodType: "FOR TIME",
+    classType: "opengym" as const,
+    category: "strength" as const,
     time: "8:45",
     rxd: true,
-    feeling: "good",
+    feeling: "good" as const,
+    duration: 3600, // 60분
     movements: [
       { name: "Deadlift", weight: 100, reps: 21, unit: "kg" },
       { name: "Pull-up", reps: 21 },
@@ -152,9 +161,12 @@ export const RECENT_WODS = [
     date: "2025-01-13",
     wodName: "Row & Thruster Hell",
     wodType: "FOR TIME",
+    classType: "class" as const,
+    category: "wod" as const,
     time: "18:32",
     rxd: true,
-    feeling: "normal",
+    feeling: "normal" as const,
+    duration: 4800, // 80분
     movements: [
       { name: "Row", distance: 1000, unit: "m" },
       { name: "Thruster", weight: 43, reps: 50, unit: "kg" },
@@ -170,9 +182,12 @@ export const RECENT_WODS = [
     date: "2025-01-11",
     wodName: "The Seven",
     wodType: "FOR TIME",
+    classType: "class" as const,
+    category: "wod" as const,
     time: "25:15",
     rxd: false,
-    feeling: "bad",
+    feeling: "bad" as const,
+    duration: 5100, // 85분
     movements: [
       { name: "HSPU", reps: 7 },
       { name: "Thruster", weight: 43, reps: 7, unit: "kg" },

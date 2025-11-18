@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import StrengthRadarChart from '../components/StrengthRadarChart';
 import OneRMTrendChart from '../components/OneRMTrendChart';
+import WorkoutSummaryModal from '../components/WorkoutSummaryModal';
 import { MapPin, Calendar, Flame, ChevronDown, ChevronUp } from 'lucide-react';
 import Tooltip from '../components/Tooltip';
 import { USER_PROFILE, ATTENDANCE_DAYS, RECENT_WODS } from '../data/dummyData';
@@ -8,6 +9,8 @@ import { USER_PROFILE, ATTENDANCE_DAYS, RECENT_WODS } from '../data/dummyData';
 export default function Dashboard() {
   const [attendanceDays, setAttendanceDays] = useState<string[]>([]);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 회원권 남은 날짜 계산
   const calculateDaysLeft = () => {
@@ -80,6 +83,32 @@ export default function Dashboard() {
   const isAttendanceDay = (date: Date) => {
     const dateString = date.toISOString().split('T')[0];
     return attendanceDays.includes(dateString);
+  };
+
+  // 날짜 클릭 핸들러
+  const handleDateClick = (dateString: string) => {
+    if (attendanceDays.includes(dateString)) {
+      setSelectedDate(dateString);
+      setIsModalOpen(true);
+    }
+  };
+
+  // 선택된 날짜의 운동 데이터 가져오기
+  const getWorkoutDataForDate = (dateString: string) => {
+    const workout = RECENT_WODS.find(wod => wod.date === dateString);
+    if (!workout) return undefined;
+
+    return {
+      wodName: workout.wodName,
+      wodType: workout.wodType,
+      classType: workout.classType,
+      category: workout.category,
+      time: workout.time,
+      rounds: workout.rounds,
+      duration: workout.duration,
+      feeling: workout.feeling,
+      notes: workout.notes
+    };
   };
 
   return (
@@ -182,9 +211,10 @@ export default function Dashboard() {
                   return (
                     <div
                       key={day}
-                      className={`aspect-square flex items-center justify-center text-xs rounded-lg ${
+                      onClick={() => handleDateClick(dateString)}
+                      className={`aspect-square flex items-center justify-center text-xs rounded-lg transition-all ${
                         isAttended
-                          ? 'bg-primary text-white font-bold'
+                          ? 'bg-primary text-white font-bold cursor-pointer hover:bg-primary/80 hover:scale-110'
                           : 'bg-light-bg text-text-tertiary'
                       }`}
                     >
@@ -212,13 +242,15 @@ export default function Dashboard() {
                   {weekDays.map((date, index) => {
                     const isAttended = isAttendanceDay(date);
                     const isToday = date.toDateString() === new Date().toDateString();
+                    const dateString = date.toISOString().split('T')[0];
 
                     return (
                       <div
                         key={index}
-                        className={`aspect-square flex items-center justify-center text-sm rounded-xl font-semibold ${
+                        onClick={() => handleDateClick(dateString)}
+                        className={`aspect-square flex items-center justify-center text-sm rounded-xl font-semibold transition-all ${
                           isAttended
-                            ? 'bg-primary text-white shadow-md'
+                            ? 'bg-primary text-white shadow-md cursor-pointer hover:bg-primary/80 hover:scale-110'
                             : isToday
                             ? 'bg-secondary-light text-secondary border-2 border-secondary'
                             : 'bg-light-bg text-text-tertiary'
@@ -279,6 +311,14 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      {/* 운동 요약 모달 */}
+      <WorkoutSummaryModal
+        date={selectedDate || ''}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        workoutData={selectedDate ? getWorkoutDataForDate(selectedDate) : undefined}
+      />
     </div>
   );
 }
