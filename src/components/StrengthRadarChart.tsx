@@ -68,7 +68,7 @@ export default function StrengthRadarChart({ data = defaultData }: StrengthRadar
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-6">
         {/* Radar Chart */}
         <div className="lg:col-span-2 h-[280px] md:h-[350px]" style={{ outline: 'none' }}>
           <ResponsiveContainer width="100%" height="100%">

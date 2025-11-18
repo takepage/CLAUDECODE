@@ -48,6 +48,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const handleWorkoutSave = (data: WorkoutLogData) => {
     const today = new Date().toISOString().split('T')[0];
 
+    // WOD 이름 생성 (카테고리 기반)
+    const getCategoryDefaultName = () => {
+      if (data.categories.length === 0) return 'Daily Workout';
+      if (data.categories.length === 1) {
+        const defaults = {
+          wod: 'Daily WOD',
+          weightlifting: '역도 트레이닝',
+          strength: '스트렝스 트레이닝',
+          gymnastics: '짐네스틱 트레이닝',
+          cardio: '유산소 트레이닝'
+        };
+        return defaults[data.categories[0]];
+      }
+      return '복합 트레이닝';
+    };
+
     // 운동 상세 정보 저장 (workoutHistory)
     const workoutData = {
       date: today,
@@ -65,9 +81,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
     const workoutLog = {
       id: `wod-${Date.now()}`,
       date: today,
-      wodName: data.wodName,
+      wodName: getCategoryDefaultName(),
       wodType: 'CUSTOM', // 사용자가 직접 기록
-      classType: data.classType,
+      classTypes: data.classTypes,
       categories: data.categories,
       duration: savedDuration,
       feeling: data.feeling,

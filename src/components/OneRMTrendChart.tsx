@@ -15,10 +15,10 @@ type TrendType = 'weight' | 'weightlifting' | 'big3';
 export default function OneRMTrendChart() {
   const [selectedTrend, setSelectedTrend] = useState<TrendType>('weight');
 
-  // 체중 추이 데이터 (lb로 변환)
+  // 체중 추이 데이터 (kg 유지)
   const weightData = WEIGHT_TREND.map(item => ({
     date: item.date.slice(5), // "2024-10-17" → "10-17"
-    체중: (item.weight * 2.20462).toFixed(1) // kg를 lb로 변환
+    체중: item.weight.toFixed(1) // kg 그대로 표시
   }));
 
   // 역도 1RM 추이 데이터 (lb로 변환)
@@ -152,7 +152,7 @@ export default function OneRMTrendChart() {
               strokeWidth={3}
               dot={{ fill: '#10B981', strokeWidth: 2, r: 6, stroke: '#fff' }}
               activeDot={{ r: 8, stroke: '#10B981', strokeWidth: 3 }}
-              name="체중 (lb)"
+              name="체중 (kg)"
             />
           )}
 

@@ -9,17 +9,15 @@ interface QuickWorkoutLogModalProps {
 }
 
 export interface WorkoutLogData {
-  classType: 'class' | 'opengym';
+  classTypes: ('class' | 'opengym')[]; // 복수 선택
   categories: ('wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio')[]; // 복수 선택
-  wodName: string;
   feeling: 'good' | 'normal' | 'bad';
   notes: string;
 }
 
 export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration }: QuickWorkoutLogModalProps) {
-  const [classType, setClassType] = useState<'class' | 'opengym'>('class');
+  const [classTypes, setClassTypes] = useState<('class' | 'opengym')[]>(['class']);
   const [categories, setCategories] = useState<('wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio')[]>(['wod']);
-  const [wodName, setWodName] = useState('');
   const [feeling, setFeeling] = useState<'good' | 'normal' | 'bad'>('good');
   const [notes, setNotes] = useState('');
 
@@ -36,29 +34,12 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
 
   const handleSave = () => {
     onSave({
-      classType,
+      classTypes,
       categories,
-      wodName: wodName || getCategoryDefaultName(),
       feeling,
       notes
     });
     onClose();
-  };
-
-  const getCategoryDefaultName = () => {
-    if (categories.length === 0) return 'Daily Workout';
-    if (categories.length === 1) {
-      const defaults = {
-        wod: 'Daily WOD',
-        weightlifting: '역도 트레이닝',
-        strength: '스트렝스 트레이닝',
-        gymnastics: '짐네스틱 트레이닝',
-        cardio: '유산소 트레이닝'
-      };
-      return defaults[categories[0]];
-    }
-    // 복수 선택 시
-    return '복합 트레이닝';
   };
 
   const toggleCategory = (cat: 'wod' | 'weightlifting' | 'strength' | 'gymnastics' | 'cardio') => {
@@ -73,9 +54,21 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
     });
   };
 
+  const toggleClassType = (type: 'class' | 'opengym') => {
+    setClassTypes(prev => {
+      if (prev.includes(type)) {
+        // 이미 선택되어 있으면 제거 (단, 최소 1개는 유지)
+        return prev.length > 1 ? prev.filter(t => t !== type) : prev;
+      } else {
+        // 선택되어 있지 않으면 추가
+        return [...prev, type];
+      }
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -93,35 +86,36 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
         </div>
 
         <div className="space-y-5">
-          {/* 수업 타입 */}
+          {/* 수업 타입 - 복수 선택 (라벨 제거) */}
           <div>
-            <label className="block text-sm font-semibold text-text-primary mb-3">
-              수업 타입
-            </label>
             <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setClassType('class')}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  classType === 'class'
-                    ? 'border-primary bg-primary-light text-primary'
-                    : 'border-light-border bg-white text-text-secondary hover:border-primary/30'
-                }`}
-              >
-                <Users className="w-6 h-6 mx-auto mb-2" />
-                <div className="font-semibold">수업</div>
-              </button>
-              <button
-                onClick={() => setClassType('opengym')}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  classType === 'opengym'
-                    ? 'border-primary bg-primary-light text-primary'
-                    : 'border-light-border bg-white text-text-secondary hover:border-primary/30'
-                }`}
-              >
-                <Dumbbell className="w-6 h-6 mx-auto mb-2" />
-                <div className="font-semibold">오픈짐</div>
-              </button>
+              {[
+                { value: 'class', label: '수업', Icon: Users },
+                { value: 'opengym', label: '오픈짐', Icon: Dumbbell }
+              ].map(({ value, label, Icon }) => {
+                const isSelected = classTypes.includes(value as any);
+                return (
+                  <button
+                    key={value}
+                    onClick={() => toggleClassType(value as any)}
+                    className={`relative p-4 rounded-xl border-2 transition-all ${
+                      isSelected
+                        ? 'border-primary bg-primary-light text-primary'
+                        : 'border-light-border bg-white text-text-secondary hover:border-primary/30'
+                    }`}
+                  >
+                    {isSelected && (
+                      <Check className="absolute top-2 right-2 w-4 h-4" />
+                    )}
+                    <Icon className="w-6 h-6 mx-auto mb-2" />
+                    <div className="font-semibold">{label}</div>
+                  </button>
+                );
+              })}
             </div>
+            <p className="text-xs text-text-tertiary mt-2">
+              선택된 항목: {classTypes.map(t => t === 'class' ? '수업' : '오픈짐').join(', ')}
+            </p>
           </div>
 
           {/* 운동 카테고리 - 복수 선택 */}
@@ -170,20 +164,6 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
             </p>
           </div>
 
-          {/* WOD 이름 */}
-          <div>
-            <label className="block text-sm font-semibold text-text-primary mb-2">
-              WOD 이름 (선택)
-            </label>
-            <input
-              type="text"
-              value={wodName}
-              onChange={(e) => setWodName(e.target.value)}
-              placeholder={getCategoryDefaultName()}
-              className="w-full px-4 py-3 rounded-xl border-2 border-light-border focus:border-primary outline-none transition-colors"
-            />
-          </div>
-
           {/* 컨디션 */}
           <div>
             <label className="block text-sm font-semibold text-text-primary mb-3">
@@ -211,15 +191,15 @@ export default function QuickWorkoutLogModal({ isOpen, onClose, onSave, duration
             </div>
           </div>
 
-          {/* 메모 */}
+          {/* 오늘의 운동 한줄평 */}
           <div>
             <label className="block text-sm font-semibold text-text-primary mb-2">
-              메모 (선택)
+              오늘의 운동 한줄평 (선택)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="오늘 운동에 대한 메모를 남겨보세요..."
+              placeholder="오늘 운동에 대한 한줄평을 남겨보세요..."
               rows={3}
               className="w-full px-4 py-3 rounded-xl border-2 border-light-border focus:border-primary outline-none transition-colors resize-none"
             />
