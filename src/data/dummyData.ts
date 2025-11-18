@@ -79,12 +79,67 @@ export const BENCHMARK_WODS = {
 // 강점 분석 (0-10점 스케일)
 export const STRENGTH_ANALYSIS = {
   categories: [
-    { name: "역도", score: 7.2, maxScore: 10 },
-    { name: "스트렝스", score: 8.8, maxScore: 10 },
-    { name: "머신", score: 7.8, maxScore: 10 },
-    { name: "짐네스틱", score: 7.5, maxScore: 10 },
-    { name: "심폐지구력", score: 8.2, maxScore: 10 },
-    { name: "근지구력", score: 7.0, maxScore: 10 }
+    {
+      name: "역도",
+      score: 7.2,
+      maxScore: 10,
+      factors: [
+        "Clean & Jerk: 125kg (중급-상급)",
+        "Snatch: 93kg (중급)",
+        "Grace 1:59 (엘리트)"
+      ]
+    },
+    {
+      name: "스트렝스",
+      score: 8.8,
+      maxScore: 10,
+      factors: [
+        "Deadlift: 206kg (상급) 💪",
+        "Back Squat: 147kg (중급)",
+        "Front Squat: 147kg (중급-상급)",
+        "Bench Press: 107kg (중급)"
+      ]
+    },
+    {
+      name: "머신",
+      score: 7.8,
+      maxScore: 10,
+      factors: [
+        "Row 500m: 1:32 (상급)",
+        "Assault Bike: 20cal/min (중급-상급)"
+      ]
+    },
+    {
+      name: "짐네스틱",
+      score: 7.5,
+      maxScore: 10,
+      factors: [
+        "Pull-up: 25개 (상급)",
+        "HSPU: 20개 (상급)",
+        "Bar Muscle-up: 10개 (상급)",
+        "Ring Muscle-up: 0개 ⚠️ (약점)"
+      ]
+    },
+    {
+      name: "심폐지구력",
+      score: 8.2,
+      maxScore: 10,
+      factors: [
+        "Fran: 4:30 (상급)",
+        "Row 500m: 1:32 (상급)",
+        "Running 1km: 6:00 (중급)"
+      ]
+    },
+    {
+      name: "근지구력",
+      score: 7.0,
+      maxScore: 10,
+      factors: [
+        "Toes to Bar: 25개 (상급)",
+        "Double Under: 100개 (상급)",
+        "Chest to Bar: 12개 (중급)"
+      ]
+    }
   ],
   athleteType: "바벨 좋아형",
   athleteEmoji: "🏋️",

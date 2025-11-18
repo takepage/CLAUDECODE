@@ -13,6 +13,20 @@
   html {
     @apply bg-light-bg;
   }
+
+  /* SVG 및 Recharts 요소의 outline 제거 */
+  svg,
+  svg *,
+  .recharts-surface,
+  .recharts-wrapper {
+    outline: none !important;
+  }
+
+  /* 클릭 시 나타나는 focus outline 제거 */
+  svg:focus,
+  svg *:focus {
+    outline: none !important;
+  }
 }
 
 @layer utilities {

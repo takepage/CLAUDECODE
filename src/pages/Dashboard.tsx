@@ -25,42 +25,36 @@ export default function Dashboard() {
 
   const boxMembershipDaysLeft = calculateDaysLeft();
 
-  // 연속 출석 일수 계산
-  const calculateConsecutiveDays = (days: string[]) => {
-    if (days.length === 0) return 0;
-
-    const sortedDays = [...days].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  // 이번 주 출석 일수 계산 (일요일 시작)
+  const calculateWeeklyAttendance = (days: string[]) => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const dayOfWeek = today.getDay(); // 0 (일요일) ~ 6 (토요일)
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - dayOfWeek);
+    weekStart.setHours(0, 0, 0, 0);
 
-    let consecutive = 0;
-    let currentDate = new Date(today);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
 
-    for (let i = 0; i < sortedDays.length; i++) {
-      const checkDate = new Date(sortedDays[i]);
-      checkDate.setHours(0, 0, 0, 0);
+    const weeklyDays = days.filter(dateString => {
+      const date = new Date(dateString);
+      return date >= weekStart && date <= weekEnd;
+    });
 
-      const dayDiff = Math.floor((currentDate.getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24));
-
-      if (dayDiff === 0 || dayDiff === 1) {
-        consecutive++;
-        currentDate = checkDate;
-      } else {
-        break;
-      }
-    }
-
-    return consecutive;
+    return weeklyDays.length;
   };
 
-  const [consecutiveDays, setConsecutiveDays] = useState(0);
+  const [weeklyAttendance, setWeeklyAttendance] = useState(0);
+  const weeklyGoal = USER_PROFILE.targetFrequency; // 주 목표 출석 횟수
+  const achievementRate = weeklyGoal > 0 ? Math.round((weeklyAttendance / weeklyGoal) * 100) : 0;
 
   useEffect(() => {
     // localStorage에서 출석 데이터 로드, 없으면 더미 데이터 사용
     const data = localStorage.getItem('attendanceDays');
     const loadedDays = data ? JSON.parse(data) : ATTENDANCE_DAYS;
     setAttendanceDays(loadedDays);
-    setConsecutiveDays(calculateConsecutiveDays(loadedDays));
+    setWeeklyAttendance(calculateWeeklyAttendance(loadedDays));
   }, []);
 
   // 현재 주의 날짜들 (일~토)
@@ -213,25 +207,46 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 연속 출석 */}
+        {/* 주간 목표 달성율 */}
         <div className="card card-hover p-6 flex flex-col h-full">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-3 rounded-xl bg-accent-orange/10">
               <Flame className="w-5 h-5 text-accent-orange" />
             </div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-text-primary">연속 출석</h3>
-              <Tooltip content="연속으로 출석한 일수입니다. 하루만 쉬어도 리셋!" />
+              <h3 className="font-semibold text-text-primary">주간 목표 달성율</h3>
+              <Tooltip content={`이번 주 목표: 주 ${weeklyGoal}회 출석`} />
             </div>
           </div>
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-6xl font-bold text-accent-orange mb-2">{consecutiveDays}</div>
-              <p className="text-sm text-text-secondary">일 연속</p>
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="text-center mb-4">
+              <div className="text-6xl font-bold text-accent-orange mb-2">{achievementRate}%</div>
+              <p className="text-sm text-text-secondary">
+                이번 주 {weeklyAttendance}/{weeklyGoal}회
+              </p>
+            </div>
+            {/* 진행바 */}
+            <div className="w-full bg-light-bg rounded-full h-3 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  achievementRate >= 100
+                    ? 'bg-gradient-to-r from-primary to-accent-green'
+                    : achievementRate >= 70
+                    ? 'bg-accent-orange'
+                    : 'bg-gray-400'
+                }`}
+                style={{ width: `${Math.min(achievementRate, 100)}%` }}
+              />
             </div>
           </div>
           <div className="text-center pt-4 border-t border-light-border">
-            <p className="text-xs text-text-tertiary">계속 가세요! 🔥</p>
+            <p className="text-xs text-text-tertiary">
+              {achievementRate >= 100
+                ? '목표 달성! 🔥'
+                : achievementRate >= 70
+                ? '거의 다 왔어요! 💪'
+                : '화이팅! 💪'}
+            </p>
           </div>
         </div>
 
