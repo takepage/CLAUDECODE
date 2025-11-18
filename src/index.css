@@ -4,14 +4,18 @@
 
 @layer base {
   body {
-    @apply bg-light-bg text-text-primary font-sans antialiased;
+    @apply bg-bg-base text-text-primary font-sans antialiased;
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    /* 모바일 화면 높이 최적화 */
+    min-height: -webkit-fill-available;
   }
 
   html {
-    @apply bg-light-bg;
+    @apply bg-bg-base;
+    /* 모바일 사파리 대응 */
+    height: -webkit-fill-available;
   }
 
   /* SVG 및 Recharts 요소의 outline 제거 */
@@ -27,14 +31,88 @@
   svg *:focus {
     outline: none !important;
   }
+
+  /* 모바일 터치 최적화 */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* 입력 필드 기본 스타일 */
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* iOS 자동 줌 방지 */
+  }
 }
 
 @layer utilities {
+  /* 카드 스타일 */
   .card {
-    @apply bg-light-card rounded-2xl shadow-card border border-light-border;
+    @apply bg-bg-card rounded-2xl shadow-sm border border-light-border;
   }
 
   .card-hover {
-    @apply hover:shadow-card-hover transition-all duration-200;
+    @apply hover:shadow-card-hover transition-all duration-200 active:scale-[0.98];
+  }
+
+  /* 버튼 스타일 */
+  .btn {
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-200 min-h-touch;
+    @apply active:scale-95;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white;
+    @apply hover:bg-primary-dark active:bg-primary-dark;
+  }
+
+  .btn-secondary {
+    @apply bg-primary-light text-primary;
+    @apply hover:bg-primary-light/80 active:bg-primary-light/60;
+  }
+
+  .btn-danger {
+    @apply bg-danger text-white;
+    @apply hover:bg-danger/90 active:bg-danger/80;
+  }
+
+  .btn-icon {
+    @apply w-12 h-12 rounded-full flex items-center justify-center;
+    @apply bg-white shadow-md transition-all duration-200;
+    @apply hover:shadow-lg active:scale-95;
+  }
+
+  /* 플로팅 버튼 */
+  .btn-float {
+    @apply fixed bottom-6 right-6 w-14 h-14 rounded-full;
+    @apply bg-primary text-white shadow-float;
+    @apply flex items-center justify-center;
+    @apply hover:scale-110 active:scale-95;
+    @apply transition-all duration-200 z-50;
+  }
+
+  /* 터치 영역 보장 */
+  .touch-target {
+    @apply min-h-touch min-w-touch flex items-center justify-center;
+  }
+
+  /* 숫자 강조 */
+  .number-display {
+    @apply text-5xl font-bold tabular-nums;
+  }
+
+  .number-display-lg {
+    @apply text-7xl font-bold tabular-nums;
+  }
+
+  /* 카드 내부 패딩 */
+  .card-content {
+    @apply p-5;
+  }
+
+  /* 구분선 */
+  .divider {
+    @apply border-t border-light-border my-4;
   }
 }
