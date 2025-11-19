@@ -466,39 +466,39 @@ export default function WODStrategy() {
                   </div>
 
                   {/* 섹션 헤더 */}
-                  <div className="p-4 border-b border-light-border">
+                  <div className="p-3 md:p-4 border-b border-light-border">
                     {/* 첫 번째 줄: 타입과 액션 버튼 */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 md:gap-3 ml-8">
+                    <div className={`flex items-center justify-between gap-2 ${!isRest && isExpanded ? 'mb-2' : ''}`}>
+                      <div className="flex items-center gap-1.5 md:gap-2 ml-8 min-w-0 overflow-hidden">
                         {/* 드래그 핸들 - 모바일에서 숨김 */}
                         <button
-                          className="hidden md:block p-1 hover:bg-light-bg rounded-lg transition-colors cursor-move"
+                          className="hidden md:block p-1 hover:bg-light-bg rounded-lg transition-colors cursor-move flex-shrink-0"
                           title="드래그하여 순서 변경"
                         >
                           <GripVertical className="w-5 h-5 text-text-tertiary" />
                         </button>
 
-                        <span className="font-bold text-text-primary text-sm md:text-base">
+                        <span className="font-bold text-text-primary text-sm md:text-base flex-shrink-0">
                           {section.type}
                         </span>
 
                         {/* REST 타입은 시간 입력을 바로 옆에 표시 */}
                         {isRest && (
-                          <div className="flex items-center gap-1 md:gap-2">
+                          <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
                             <input
                               type="number"
                               value={section.duration || ''}
                               onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
-                              className="w-12 md:w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              className="w-12 md:w-14 px-2 py-1 rounded-lg border border-light-border text-sm"
                               placeholder="3"
                             />
-                            <span className="text-xs text-text-tertiary">분</span>
+                            <span className="text-xs text-text-tertiary whitespace-nowrap">분</span>
                           </div>
                         )}
                       </div>
 
-                      {/* 섹션 액션 버튼 */}
-                      <div className="flex items-center gap-0.5 md:gap-1">
+                      {/* 섹션 액션 버튼 - 절대 축소 안됨 */}
+                      <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
                         <button
                           onClick={() => duplicateSection(section.id)}
                           className="p-1.5 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
@@ -529,48 +529,48 @@ export default function WODStrategy() {
 
                     {/* 두 번째 줄: 시간 입력 (펼쳤을 때만, REST 제외) */}
                     {!isRest && isExpanded && (
-                      <div className="ml-8 mt-2 flex items-center flex-wrap gap-2">
+                      <div className="ml-8 flex items-center flex-wrap gap-1.5 md:gap-2">
                         {section.type === 'AMRAP' && (
                           <>
                             <input
                               type="number"
                               value={section.duration || ''}
                               onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
-                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              className="w-12 md:w-14 px-2 py-1 rounded-lg border border-light-border text-sm"
                               placeholder="5"
                             />
-                            <span className="text-xs text-text-tertiary">분</span>
+                            <span className="text-xs text-text-tertiary whitespace-nowrap">분</span>
                           </>
                         )}
                         {section.type === 'FOR_TIME' && (
                           <>
-                            <span className="text-xs text-text-tertiary">Timecap:</span>
+                            <span className="text-xs text-text-tertiary whitespace-nowrap">Timecap:</span>
                             <input
                               type="number"
                               value={section.timecap || ''}
                               onChange={(e) => updateSection(section.id, { timecap: parseInt(e.target.value) || undefined })}
-                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              className="w-12 md:w-14 px-2 py-1 rounded-lg border border-light-border text-sm"
                               placeholder="20"
                             />
-                            <span className="text-xs text-text-tertiary">분</span>
+                            <span className="text-xs text-text-tertiary whitespace-nowrap">분</span>
                           </>
                         )}
                         {section.type === 'EMOM' && (
                           <>
-                            <span className="text-xs text-text-tertiary">Every</span>
+                            <span className="text-xs text-text-tertiary whitespace-nowrap">Every</span>
                             <input
                               type="number"
                               value={section.interval || ''}
                               onChange={(e) => updateSection(section.id, { interval: parseInt(e.target.value) || 1 })}
-                              className="w-10 md:w-12 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              className="w-9 md:w-10 px-1.5 md:px-2 py-1 rounded-lg border border-light-border text-sm"
                               placeholder="1"
                             />
-                            <span className="text-xs text-text-tertiary">분 x</span>
+                            <span className="text-xs text-text-tertiary whitespace-nowrap">분 x</span>
                             <input
                               type="number"
                               value={section.rounds || ''}
                               onChange={(e) => updateSection(section.id, { rounds: parseInt(e.target.value) || 0 })}
-                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              className="w-12 md:w-14 px-2 py-1 rounded-lg border border-light-border text-sm"
                               placeholder="10"
                             />
                             <span className="text-xs text-text-tertiary whitespace-nowrap">라운드</span>
