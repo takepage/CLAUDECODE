@@ -19,7 +19,8 @@ import {
   USER_PROFILE,
   ATTENDANCE_DAYS,
   DAILY_INSIGHTS,
-  RECENT_ACTIVITIES
+  RECENT_ACTIVITIES,
+  RECENT_WODS
 } from '../data/dummyData';
 
 export default function Dashboard() {
@@ -125,6 +126,7 @@ export default function Dashboard() {
   };
 
   const getWorkoutDataForDate = (dateString: string) => {
+    // 1. localStorage에서 먼저 확인
     const logsData = localStorage.getItem('workoutLogs');
     if (logsData) {
       const workoutLogs = JSON.parse(logsData);
@@ -143,6 +145,23 @@ export default function Dashboard() {
         };
       }
     }
+
+    // 2. localStorage에 없으면 RECENT_WODS 더미 데이터에서 찾기
+    const recentWod = RECENT_WODS.find((wod) => wod.date === dateString);
+    if (recentWod) {
+      return {
+        wodName: recentWod.wodName,
+        wodType: recentWod.wodType,
+        classType: recentWod.classType,
+        categories: recentWod.categories,
+        time: recentWod.time,
+        rounds: recentWod.rounds,
+        duration: recentWod.duration,
+        feeling: recentWod.feeling,
+        notes: recentWod.notes
+      };
+    }
+
     return undefined;
   };
 
