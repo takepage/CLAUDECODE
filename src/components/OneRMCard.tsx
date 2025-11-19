@@ -17,41 +17,37 @@ interface OneRMCardProps {
 
 const colorClasses = {
   pink: {
-    bg: 'bg-neon-pink/10',
-    border: 'border-neon-pink/30',
-    text: 'text-neon-pink',
-    glow: 'glow-pink',
+    bg: 'bg-accent-pink/10',
+    border: 'border-accent-pink/30',
+    text: 'text-accent-pink',
   },
   blue: {
-    bg: 'bg-neon-blue/10',
-    border: 'border-neon-blue/30',
-    text: 'text-neon-blue',
-    glow: 'glow-blue',
+    bg: 'bg-accent-blue/10',
+    border: 'border-accent-blue/30',
+    text: 'text-accent-blue',
   },
   green: {
-    bg: 'bg-neon-green/10',
-    border: 'border-neon-green/30',
-    text: 'text-neon-green',
-    glow: 'glow-green',
+    bg: 'bg-accent-green/10',
+    border: 'border-accent-green/30',
+    text: 'text-accent-green',
   },
   orange: {
-    bg: 'bg-neon-orange/10',
-    border: 'border-neon-orange/30',
-    text: 'text-neon-orange',
-    glow: 'glow-orange',
+    bg: 'bg-accent-orange/10',
+    border: 'border-accent-orange/30',
+    text: 'text-accent-orange',
   },
 };
 
 export default function OneRMCard({ title, subtitle, records }: OneRMCardProps) {
   return (
-    <div className="bg-dark-card rounded-3xl p-6 border border-gray-800/50 hover:border-neon-blue/30 transition-all duration-300">
+    <div className="bg-bg-card rounded-3xl p-6 border border-light-border hover:border-accent-blue/30 transition-all duration-300">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 rounded-2xl bg-neon-blue/10 border border-neon-blue/30">
-          <Dumbbell className="w-6 h-6 text-neon-blue" />
+        <div className="p-3 rounded-2xl bg-accent-blue/10 border border-accent-blue/30">
+          <Dumbbell className="w-6 h-6 text-accent-blue" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-white">{title}</h3>
-          <p className="text-sm text-gray-400">{subtitle}</p>
+          <h3 className="text-xl font-bold text-text-primary">{title}</h3>
+          <p className="text-sm text-text-tertiary">{subtitle}</p>
         </div>
       </div>
 
@@ -64,7 +60,7 @@ export default function OneRMCard({ title, subtitle, records }: OneRMCardProps) 
               className={`p-4 rounded-2xl ${colors.bg} border ${colors.border} hover:scale-[1.02] transition-transform duration-200`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-300">{record.name}</span>
+                <span className="text-sm font-semibold text-text-secondary">{record.name}</span>
                 {record.trend > 0 && (
                   <div className={`flex items-center gap-1 text-xs ${colors.text}`}>
                     <TrendingUp className="w-3 h-3" />
@@ -76,13 +72,13 @@ export default function OneRMCard({ title, subtitle, records }: OneRMCardProps) 
               <div className="flex items-end justify-between">
                 <div>
                   <div className="flex items-baseline gap-2">
-                    <span className={`text-4xl font-bold ${colors.text} ${colors.glow}`}>
+                    <span className={`text-4xl font-bold ${colors.text}`}>
                       {record.weight}
                     </span>
-                    <span className="text-lg text-gray-400 font-medium">{record.unit}</span>
+                    <span className="text-lg text-text-tertiary font-medium">{record.unit}</span>
                   </div>
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-text-tertiary">
                   {record.lastUpdated}
                 </div>
               </div>

@@ -25,35 +25,35 @@ const performanceData = [
 ];
 
 const intensityColors = {
-  high: 'text-neon-pink',
-  medium: 'text-neon-orange',
-  low: 'text-neon-green',
+  high: 'text-accent-pink',
+  medium: 'text-accent-orange',
+  low: 'text-accent-green',
 };
 
 const intensityBgColors = {
-  high: 'bg-neon-pink/10 border-neon-pink/30',
-  medium: 'bg-neon-orange/10 border-neon-orange/30',
-  low: 'bg-neon-green/10 border-neon-green/30',
+  high: 'bg-accent-pink/10 border-accent-pink/30',
+  medium: 'bg-accent-orange/10 border-accent-orange/30',
+  low: 'bg-accent-green/10 border-accent-green/30',
 };
 
 export default function RecentWODs() {
   return (
-    <div className="bg-dark-card rounded-3xl p-6 border border-gray-800/50 hover:border-neon-cyan/30 transition-all duration-300">
+    <div className="bg-bg-card rounded-3xl p-6 border border-light-border hover:border-accent-blue/30 transition-all duration-300">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-white mb-1">최근 운동 기록</h3>
-          <p className="text-sm text-gray-400">지난 2주간의 WOD</p>
+          <h3 className="text-xl font-bold text-text-primary mb-1">최근 운동 기록</h3>
+          <p className="text-sm text-text-tertiary">지난 2주간의 WOD</p>
         </div>
-        <div className="px-4 py-2 rounded-full bg-neon-cyan/10 border border-neon-cyan/30">
-          <span className="text-sm font-semibold text-neon-cyan">4 WODs</span>
+        <div className="px-4 py-2 rounded-full bg-accent-blue/10 border border-accent-blue/30">
+          <span className="text-sm font-semibold text-accent-blue">4 WODs</span>
         </div>
       </div>
 
       {/* Performance Chart */}
-      <div className="mb-6 p-4 rounded-2xl bg-gray-800/30">
+      <div className="mb-6 p-4 rounded-2xl bg-light-card">
         <div className="flex items-center gap-2 mb-3">
-          <Flame className="w-4 h-4 text-neon-pink" />
-          <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
+          <Flame className="w-4 h-4 text-accent-pink" />
+          <span className="text-xs text-text-tertiary font-semibold uppercase tracking-wide">
             퍼포먼스 트렌드
           </span>
         </div>
@@ -106,23 +106,23 @@ export default function RecentWODs() {
         {recentWODs.map((wod, index) => (
           <div
             key={index}
-            className="p-4 rounded-2xl bg-gray-800/30 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200"
+            className="p-4 rounded-2xl bg-light-card border border-light-border hover:border-light-card-hover transition-all duration-200"
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-base font-bold text-white">{wod.name}</h4>
+                  <h4 className="text-base font-bold text-text-primary">{wod.name}</h4>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${intensityBgColors[wod.intensity]} ${intensityColors[wod.intensity]}`}>
                     {wod.type}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-text-tertiary">
                   {new Date(wod.date).toLocaleDateString('ko-KR')}
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-gray-500" />
+                <Clock className="w-4 h-4 text-text-tertiary" />
                 <span className={`text-lg font-bold ${intensityColors[wod.intensity]}`}>
                   {wod.time}
                 </span>
