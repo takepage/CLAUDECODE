@@ -467,105 +467,41 @@ export default function WODStrategy() {
 
                   {/* 섹션 헤더 */}
                   <div className="p-4 border-b border-light-border">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1 ml-8">
+                    {/* 첫 번째 줄: 타입과 버튼 */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 ml-8">
                         {/* 드래그 핸들 */}
                         <button
-                          className="p-1 hover:bg-light-bg rounded-lg transition-colors cursor-move"
+                          className="p-1 hover:bg-light-bg rounded-lg transition-colors cursor-move flex-shrink-0"
                           title="드래그하여 순서 변경"
                         >
                           <GripVertical className="w-5 h-5 text-text-tertiary" />
                         </button>
 
-                        <span className="font-bold text-text-primary">
+                        <span className="font-bold text-text-primary text-sm sm:text-base whitespace-nowrap">
                           {section.type}
                         </span>
-
-                        {/* 시간 입력 */}
-                        {!isRest && isExpanded && (
-                          <div className="flex items-center gap-2 ml-4">
-                            {section.type === 'AMRAP' && (
-                              <>
-                                <input
-                                  type="number"
-                                  value={section.duration || ''}
-                                  onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
-                                  className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
-                                  placeholder="5"
-                                />
-                                <span className="text-xs text-text-tertiary">분</span>
-                              </>
-                            )}
-                            {section.type === 'FOR_TIME' && (
-                              <>
-                                <span className="text-xs text-text-tertiary">Timecap:</span>
-                                <input
-                                  type="number"
-                                  value={section.timecap || ''}
-                                  onChange={(e) => updateSection(section.id, { timecap: parseInt(e.target.value) || undefined })}
-                                  className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
-                                  placeholder="20"
-                                />
-                                <span className="text-xs text-text-tertiary">분</span>
-                              </>
-                            )}
-                            {section.type === 'EMOM' && (
-                              <>
-                                <span className="text-xs text-text-tertiary">Every</span>
-                                <input
-                                  type="number"
-                                  value={section.interval || ''}
-                                  onChange={(e) => updateSection(section.id, { interval: parseInt(e.target.value) || 1 })}
-                                  className="w-12 px-2 py-1 rounded-lg border border-light-border text-sm"
-                                  placeholder="1"
-                                />
-                                <span className="text-xs text-text-tertiary">분 x</span>
-                                <input
-                                  type="number"
-                                  value={section.rounds || ''}
-                                  onChange={(e) => updateSection(section.id, { rounds: parseInt(e.target.value) || 0 })}
-                                  className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
-                                  placeholder="10"
-                                />
-                                <span className="text-xs text-text-tertiary">라운드</span>
-                              </>
-                            )}
-                          </div>
-                        )}
-
-                        {isRest && (
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="number"
-                              value={section.duration || ''}
-                              onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
-                              className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
-                              placeholder="3"
-                            />
-                            <span className="text-xs text-text-tertiary">분</span>
-                          </div>
-                        )}
                       </div>
 
                       {/* 섹션 액션 버튼 */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         <button
                           onClick={() => duplicateSection(section.id)}
-                          className="p-2 hover:bg-light-bg rounded-lg transition-colors"
+                          className="p-1.5 sm:p-2 hover:bg-light-bg rounded-lg transition-colors"
                           title="복제"
                         >
                           <Copy className="w-4 h-4 text-text-tertiary" />
                         </button>
                         <button
                           onClick={() => deleteSection(section.id)}
-                          className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1.5 sm:p-2 hover:bg-red-50 rounded-lg transition-colors"
                           title="삭제"
                         >
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </button>
                         <button
                           onClick={() => toggleSection(section.id)}
-                          className="p-2 hover:bg-light-bg rounded-lg transition-colors"
+                          className="p-1.5 sm:p-2 hover:bg-light-bg rounded-lg transition-colors"
                           title={isExpanded ? "접기" : "펼치기"}
                         >
                           {isExpanded ? (
@@ -576,6 +512,77 @@ export default function WODStrategy() {
                         </button>
                       </div>
                     </div>
+
+                    {/* 두 번째 줄: 시간 입력 (펼쳐졌을 때만) */}
+                    {!isRest && isExpanded && (
+                      <div className="ml-8">
+                        {section.type === 'AMRAP' && (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              value={section.duration || ''}
+                              onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
+                              className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              placeholder="5"
+                            />
+                            <span className="text-xs text-text-tertiary">분</span>
+                          </div>
+                        )}
+                        {section.type === 'FOR_TIME' && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-text-tertiary hidden sm:inline">Timecap:</span>
+                            <input
+                              type="number"
+                              value={section.timecap || ''}
+                              onChange={(e) => updateSection(section.id, { timecap: parseInt(e.target.value) || undefined })}
+                              className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              placeholder="20"
+                            />
+                            <span className="text-xs text-text-tertiary">분</span>
+                          </div>
+                        )}
+                        {section.type === 'EMOM' && (
+                          <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs text-text-tertiary hidden sm:inline">Every</span>
+                              <input
+                                type="number"
+                                value={section.interval || ''}
+                                onChange={(e) => updateSection(section.id, { interval: parseInt(e.target.value) || 1 })}
+                                className="w-12 px-2 py-1 rounded-lg border border-light-border text-sm"
+                                placeholder="1"
+                              />
+                              <span className="text-xs text-text-tertiary">분</span>
+                            </div>
+                            <span className="text-xs text-text-tertiary">×</span>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="number"
+                                value={section.rounds || ''}
+                                onChange={(e) => updateSection(section.id, { rounds: parseInt(e.target.value) || 0 })}
+                                className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                                placeholder="10"
+                              />
+                              <span className="text-xs text-text-tertiary">라운드</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* REST 타입 시간 입력 */}
+                    {isRest && (
+                      <div className="ml-8 flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={section.duration || ''}
+                          onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
+                          className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                          placeholder="3"
+                        />
+                        <span className="text-xs text-text-tertiary">분</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* 섹션 내용 */}
