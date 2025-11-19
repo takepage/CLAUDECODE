@@ -350,13 +350,13 @@ export default function WODStrategy() {
   return (
     <div>
       {/* 헤더 */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 rounded-xl bg-primary-light">
-          <Sparkles className="w-6 h-6 text-primary" />
+      <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8">
+        <div className="p-2 md:p-3 rounded-xl bg-primary-light">
+          <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-text-primary">WOD 전략 분석</h2>
-          <p className="text-sm text-text-secondary">블록을 추가하여 복잡한 WOD도 쉽게 구성하세요</p>
+          <h2 className="text-xl md:text-2xl font-bold text-text-primary">WOD 전략 분석</h2>
+          <p className="text-xs md:text-sm text-text-secondary">블록을 추가하여 복잡한 WOD도 쉽게 구성하세요</p>
         </div>
       </div>
 
@@ -466,121 +466,114 @@ export default function WODStrategy() {
                   </div>
 
                   {/* 섹션 헤더 */}
-                  <div className="p-4 border-b border-light-border">
-                    {/* 첫 번째 줄: 타입과 버튼 */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2 ml-8">
-                        {/* 드래그 핸들 */}
+                  <div className="p-3 md:p-4 border-b border-light-border space-y-2">
+                    {/* 첫 번째 줄: 타입과 액션 버튼만 (시간 입력 없음) */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 md:gap-2 ml-8 flex-shrink-0">
+                        {/* 드래그 핸들 - 모바일에서 숨김 */}
                         <button
-                          className="p-1 hover:bg-light-bg rounded-lg transition-colors cursor-move flex-shrink-0"
+                          className="hidden md:block p-1 hover:bg-light-bg rounded-lg transition-colors cursor-move flex-shrink-0"
                           title="드래그하여 순서 변경"
                         >
                           <GripVertical className="w-5 h-5 text-text-tertiary" />
                         </button>
 
-                        <span className="font-bold text-text-primary text-sm sm:text-base whitespace-nowrap">
+                        <span className="font-bold text-text-primary text-sm md:text-base">
                           {section.type}
                         </span>
                       </div>
 
-                      {/* 섹션 액션 버튼 */}
-                      <div className="flex items-center gap-1 flex-shrink-0">
+                      {/* 섹션 액션 버튼 - 항상 보임 */}
+                      <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
                         <button
                           onClick={() => duplicateSection(section.id)}
-                          className="p-1.5 sm:p-2 hover:bg-light-bg rounded-lg transition-colors"
+                          className="p-1.5 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
                           title="복제"
                         >
-                          <Copy className="w-4 h-4 text-text-tertiary" />
+                          <Copy className="w-3.5 h-3.5 md:w-4 md:h-4 text-text-tertiary" />
                         </button>
                         <button
                           onClick={() => deleteSection(section.id)}
-                          className="p-1.5 sm:p-2 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors"
                           title="삭제"
                         >
-                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
                         </button>
                         <button
                           onClick={() => toggleSection(section.id)}
-                          className="p-1.5 sm:p-2 hover:bg-light-bg rounded-lg transition-colors"
+                          className="p-1.5 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
                           title={isExpanded ? "접기" : "펼치기"}
                         >
                           {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-text-tertiary" />
+                            <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-text-tertiary" />
                           ) : (
-                            <ChevronDown className="w-5 h-5 text-text-tertiary" />
+                            <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-text-tertiary" />
                           )}
                         </button>
                       </div>
                     </div>
 
-                    {/* 두 번째 줄: 시간 입력 (펼쳐졌을 때만) */}
-                    {!isRest && isExpanded && (
-                      <div className="ml-8">
-                        {section.type === 'AMRAP' && (
+                    {/* 두 번째 줄: 시간 입력만 (펼쳤을 때 또는 REST 타입) */}
+                    {(isExpanded || isRest) && (
+                      <div className="ml-8 text-sm">
+                        {isRest && (
                           <div className="flex items-center gap-2">
                             <input
                               type="number"
                               value={section.duration || ''}
                               onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
-                              className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border"
+                              placeholder="3"
+                            />
+                            <span className="text-xs text-text-tertiary">분</span>
+                          </div>
+                        )}
+                        {!isRest && section.type === 'AMRAP' && (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              value={section.duration || ''}
+                              onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
+                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border"
                               placeholder="5"
                             />
                             <span className="text-xs text-text-tertiary">분</span>
                           </div>
                         )}
-                        {section.type === 'FOR_TIME' && (
+                        {!isRest && section.type === 'FOR_TIME' && (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-text-tertiary hidden sm:inline">Timecap:</span>
+                            <span className="text-xs text-text-tertiary">Timecap:</span>
                             <input
                               type="number"
                               value={section.timecap || ''}
                               onChange={(e) => updateSection(section.id, { timecap: parseInt(e.target.value) || undefined })}
-                              className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
+                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border"
                               placeholder="20"
                             />
                             <span className="text-xs text-text-tertiary">분</span>
                           </div>
                         )}
-                        {section.type === 'EMOM' && (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs text-text-tertiary hidden sm:inline">Every</span>
-                              <input
-                                type="number"
-                                value={section.interval || ''}
-                                onChange={(e) => updateSection(section.id, { interval: parseInt(e.target.value) || 1 })}
-                                className="w-12 px-2 py-1 rounded-lg border border-light-border text-sm"
-                                placeholder="1"
-                              />
-                              <span className="text-xs text-text-tertiary">분</span>
-                            </div>
-                            <span className="text-xs text-text-tertiary">×</span>
-                            <div className="flex items-center gap-1.5">
-                              <input
-                                type="number"
-                                value={section.rounds || ''}
-                                onChange={(e) => updateSection(section.id, { rounds: parseInt(e.target.value) || 0 })}
-                                className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
-                                placeholder="10"
-                              />
-                              <span className="text-xs text-text-tertiary">라운드</span>
-                            </div>
+                        {!isRest && section.type === 'EMOM' && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-text-tertiary">Every</span>
+                            <input
+                              type="number"
+                              value={section.interval || ''}
+                              onChange={(e) => updateSection(section.id, { interval: parseInt(e.target.value) || 1 })}
+                              className="w-12 md:w-14 px-2 py-1 rounded-lg border border-light-border"
+                              placeholder="1"
+                            />
+                            <span className="text-xs text-text-tertiary">분 x</span>
+                            <input
+                              type="number"
+                              value={section.rounds || ''}
+                              onChange={(e) => updateSection(section.id, { rounds: parseInt(e.target.value) || 0 })}
+                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border"
+                              placeholder="10"
+                            />
+                            <span className="text-xs text-text-tertiary">라운드</span>
                           </div>
                         )}
-                      </div>
-                    )}
-
-                    {/* REST 타입 시간 입력 */}
-                    {isRest && (
-                      <div className="ml-8 flex items-center gap-2">
-                        <input
-                          type="number"
-                          value={section.duration || ''}
-                          onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
-                          className="w-16 px-2 py-1 rounded-lg border border-light-border text-sm"
-                          placeholder="3"
-                        />
-                        <span className="text-xs text-text-tertiary">분</span>
                       </div>
                     )}
                   </div>
@@ -590,10 +583,10 @@ export default function WODStrategy() {
                     <div className="p-4 space-y-3">
                       {/* 동작 리스트 */}
                       {section.movements.map((movement, mIndex) => (
-                        <div key={movement.id} className="p-3 rounded-xl bg-light-bg border border-light-border">
-                          <div className="flex items-start gap-2">
-                            <span className="text-xs font-bold text-text-tertiary mt-2">{mIndex + 1}</span>
-                            <div className="flex-1 space-y-2 relative">
+                        <div key={movement.id} className="p-2 md:p-3 rounded-xl bg-light-bg border border-light-border">
+                          <div className="flex items-start gap-1.5 md:gap-2">
+                            <span className="text-xs font-bold text-text-tertiary mt-2 min-w-[1rem]">{mIndex + 1}</span>
+                            <div className="flex-1 space-y-2 relative min-w-0">
                               {/* 동작명 */}
                               <div className="relative">
                                 <input
@@ -709,8 +702,8 @@ export default function WODStrategy() {
 
                                   {/* 무게 설정 */}
                                   <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-xs text-text-tertiary min-w-[50px]">RxD:</span>
+                                    <div className="flex items-center flex-wrap gap-1.5 md:gap-2">
+                                      <span className="text-xs text-text-tertiary min-w-[45px] md:min-w-[50px]">RxD:</span>
                                       <input
                                         type="number"
                                         value={movement.rxdWeight || ''}
@@ -718,7 +711,7 @@ export default function WODStrategy() {
                                           rxdWeight: parseFloat(e.target.value) || undefined
                                         })}
                                         placeholder="135"
-                                        className="w-20 px-2 py-1 rounded-lg border border-light-border text-sm"
+                                        className="w-16 md:w-20 px-2 py-1 rounded-lg border border-light-border text-sm"
                                       />
                                       <select
                                         value={movement.weightUnit || 'lb'}
@@ -731,8 +724,8 @@ export default function WODStrategy() {
                                         <option value="kg">kg</option>
                                       </select>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-xs text-text-tertiary min-w-[50px]">Scaled:</span>
+                                    <div className="flex items-center flex-wrap gap-1.5 md:gap-2">
+                                      <span className="text-xs text-text-tertiary min-w-[45px] md:min-w-[50px]">Scaled:</span>
                                       <input
                                         type="number"
                                         value={movement.scaledWeight || ''}
@@ -740,7 +733,7 @@ export default function WODStrategy() {
                                           scaledWeight: parseFloat(e.target.value) || undefined
                                         })}
                                         placeholder="95"
-                                        className="w-20 px-2 py-1 rounded-lg border border-light-border text-sm"
+                                        className="w-16 md:w-20 px-2 py-1 rounded-lg border border-light-border text-sm"
                                       />
                                       <span className="text-xs text-text-tertiary">{movement.weightUnit || 'lb'}</span>
                                       {(() => {
@@ -780,25 +773,25 @@ export default function WODStrategy() {
                                   value={movement.progressivePattern || ''}
                                   onChange={(e) => updateMovement(section.id, movement.id, { progressivePattern: e.target.value })}
                                   placeholder="10-15-20-25-30"
-                                  className="w-full px-3 py-2 rounded-lg border border-light-border text-sm"
+                                  className="w-full px-2 md:px-3 py-2 rounded-lg border border-light-border text-sm"
                                 />
                               ) : (
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-1.5 md:gap-2">
                                   <input
                                     type="text"
                                     value={movement.value}
                                     onChange={(e) => updateMovement(section.id, movement.id, { value: e.target.value })}
-                                    placeholder="횟수/칼로리/거리"
-                                    className="flex-1 px-3 py-2 rounded-lg border border-light-border text-sm"
+                                    placeholder="횟수"
+                                    className="flex-1 min-w-[80px] px-2 md:px-3 py-2 rounded-lg border border-light-border text-sm"
                                   />
                                   <select
                                     value={movement.type}
                                     onChange={(e) => updateMovement(section.id, movement.id, { type: e.target.value as any })}
-                                    className="px-3 py-2 rounded-lg border border-light-border text-sm"
+                                    className="px-2 md:px-3 py-2 rounded-lg border border-light-border text-sm min-w-[70px]"
                                   >
                                     <option value="reps">Reps</option>
                                     <option value="calories">Cal</option>
-                                    <option value="distance">Distance</option>
+                                    <option value="distance">거리</option>
                                   </select>
                                   {movement.type === 'distance' && (
                                     <input
@@ -806,7 +799,7 @@ export default function WODStrategy() {
                                       value={movement.unit || 'm'}
                                       onChange={(e) => updateMovement(section.id, movement.id, { unit: e.target.value })}
                                       placeholder="m"
-                                      className="w-16 px-3 py-2 rounded-lg border border-light-border text-sm"
+                                      className="w-12 md:w-16 px-2 md:px-3 py-2 rounded-lg border border-light-border text-sm"
                                     />
                                   )}
                                 </div>
@@ -815,9 +808,9 @@ export default function WODStrategy() {
 
                             <button
                               onClick={() => deleteMovement(section.id, movement.id)}
-                              className="p-2 hover:bg-red-50 rounded-lg transition-colors mt-1"
+                              className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors mt-1 flex-shrink-0"
                             >
-                              <Trash2 className="w-4 h-4 text-red-500" />
+                              <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
                             </button>
                           </div>
                         </div>
