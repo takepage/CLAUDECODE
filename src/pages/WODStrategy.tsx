@@ -114,10 +114,30 @@ const deleteWODFromStorage = (id: string) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(wods));
 };
 
+// 운동 기록 추가
+const WORKOUT_LOG_KEY = 'workout-logs';
+
+interface WorkoutLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  wodId?: string;
+  wodName: string;
+  wodPreview: string; // WOD 텍스트 미리보기
+  notes?: string;
+}
+
+const addWorkoutLog = (log: WorkoutLog) => {
+  const logs = localStorage.getItem(WORKOUT_LOG_KEY);
+  const logsList: WorkoutLog[] = logs ? JSON.parse(logs) : [];
+  logsList.push(log);
+  localStorage.setItem(WORKOUT_LOG_KEY, JSON.stringify(logsList));
+};
+
 export default function WODStrategy() {
   const [sections, setSections] = useState<Section[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [draggedSection, setDraggedSection] = useState<string | null>(null);
+  const [draggedMovement, setDraggedMovement] = useState<{ sectionId: string; movementId: string } | null>(null);
   const [movementSuggestions, setMovementSuggestions] = useState<{ [key: string]: string[] }>({});
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -129,6 +149,7 @@ export default function WODStrategy() {
   const [showSavedWODs, setShowSavedWODs] = useState(false);
   const [editingWodId, setEditingWodId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [logAsWorkout, setLogAsWorkout] = useState(false);
 
   // 저장된 WOD 목록 로드
   useEffect(() => {
@@ -179,7 +200,7 @@ export default function WODStrategy() {
     setSections(sections.map(s => s.id === sectionId ? { ...s, ...updates } : s));
   };
 
-  // 드래그 앤 드롭
+  // 드래그 앤 드롭 (섹션)
   const handleDragStart = (e: React.DragEvent, sectionId: string) => {
     setDraggedSection(sectionId);
     e.dataTransfer.effectAllowed = 'move';
@@ -203,6 +224,45 @@ export default function WODStrategy() {
 
     setSections(newSections);
     setDraggedSection(null);
+  };
+
+  // 드래그 앤 드롭 (동작)
+  const handleMovementDragStart = (e: React.DragEvent, sectionId: string, movementId: string) => {
+    setDraggedMovement({ sectionId, movementId });
+    e.dataTransfer.effectAllowed = 'move';
+    e.stopPropagation(); // 섹션 드래그와 충돌 방지
+  };
+
+  const handleMovementDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.stopPropagation();
+  };
+
+  const handleMovementDrop = (e: React.DragEvent, targetSectionId: string, targetMovementId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!draggedMovement) return;
+    if (draggedMovement.sectionId !== targetSectionId) return; // 같은 섹션 내에서만 이동
+    if (draggedMovement.movementId === targetMovementId) return;
+
+    const section = sections.find(s => s.id === targetSectionId);
+    if (!section) return;
+
+    const draggedIndex = section.movements.findIndex(m => m.id === draggedMovement.movementId);
+    const targetIndex = section.movements.findIndex(m => m.id === targetMovementId);
+
+    const newMovements = [...section.movements];
+    const [removed] = newMovements.splice(draggedIndex, 1);
+    newMovements.splice(targetIndex, 0, removed);
+
+    setSections(sections.map(s =>
+      s.id === targetSectionId
+        ? { ...s, movements: newMovements }
+        : s
+    ));
+    setDraggedMovement(null);
   };
 
   // 동작 추가
@@ -329,6 +389,22 @@ export default function WODStrategy() {
     // 이름이 없었으면 자동 생성된 이름으로 설정
     if (!wodName.trim()) {
       setWodName(name);
+    }
+
+    // 운동 기록에 추가
+    if (logAsWorkout) {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      addWorkoutLog({
+        id: `log-${Date.now()}`,
+        date: today,
+        wodId: id,
+        wodName: name,
+        wodPreview: generateWODText()
+      });
+      setLogAsWorkout(false); // 체크박스 리셋
+      alert(`WOD가 저장되고 ${today} 운동 기록에 추가되었습니다!`);
+    } else {
+      alert('WOD가 저장되었습니다!');
     }
   };
 
@@ -525,6 +601,21 @@ export default function WODStrategy() {
           <p className="text-xs text-text-tertiary">
             현재 편집 중: <span className="font-semibold text-primary">{wodName}</span>
           </p>
+        )}
+
+        {sections.length > 0 && (
+          <div className="flex items-center gap-2 pt-2 border-t border-light-border">
+            <input
+              type="checkbox"
+              id="log-as-workout"
+              checked={logAsWorkout}
+              onChange={(e) => setLogAsWorkout(e.target.checked)}
+              className="rounded border-light-border"
+            />
+            <label htmlFor="log-as-workout" className="text-sm text-text-secondary cursor-pointer select-none">
+              ✅ 오늘 이 WOD를 완료했습니다 (운동 기록에 추가)
+            </label>
+          </div>
         )}
       </div>
 
@@ -790,9 +881,16 @@ export default function WODStrategy() {
 
                       {/* 동작 리스트 */}
                       {section.movements.map((movement, mIndex) => (
-                        <div key={movement.id} className="p-2 md:p-3 rounded-xl bg-light-bg border border-light-border">
+                        <div
+                          key={movement.id}
+                          className="p-2 md:p-3 rounded-xl bg-light-bg border border-light-border cursor-move"
+                          draggable
+                          onDragStart={(e) => handleMovementDragStart(e, section.id, movement.id)}
+                          onDragOver={handleMovementDragOver}
+                          onDrop={(e) => handleMovementDrop(e, section.id, movement.id)}
+                        >
                           <div className="flex items-start gap-1.5 md:gap-2">
-                            <span className="text-xs font-bold text-text-tertiary mt-2 min-w-[1rem]">{mIndex + 1}</span>
+                            <span className="text-xs font-bold text-text-tertiary mt-2 min-w-[1rem] select-none">{mIndex + 1}</span>
                             <div className="flex-1 space-y-2 relative min-w-0">
                               {/* 동작명 */}
                               <div className="relative">
