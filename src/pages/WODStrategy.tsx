@@ -65,11 +65,8 @@ interface Movement {
   unit?: string;
   isProgressive: boolean;
   progressivePattern?: string;
-  // 스케일링 관련
-  isScaled: boolean;
-  scaledMovementName?: string; // 동작 스케일 (예: C2B → Pull-up)
-  rxdWeight?: number;
-  scaledWeight?: number;
+  // 무게 설정
+  weight?: number;
   weightUnit?: 'lb' | 'kg';
 }
 
@@ -169,7 +166,6 @@ export default function WODStrategy() {
       type: 'reps',
       value: '',
       isProgressive: false,
-      isScaled: false,
       weightUnit: 'lb'
     };
     setSections(sections.map(s =>
@@ -236,19 +232,6 @@ export default function WODStrategy() {
     setExpandedSections(newExpanded);
   };
 
-  // 무게 스케일 퍼센티지 계산
-  const calculateWeightPercentage = (rxd?: number, scaled?: number): number | null => {
-    if (!rxd || !scaled || rxd === 0) return null;
-    return Math.round((scaled / rxd) * 100);
-  };
-
-  // 퍼센티지에 따른 색상 반환
-  const getPercentageColor = (percentage: number): string => {
-    if (percentage >= 80) return 'text-primary bg-primary-light';
-    if (percentage >= 60) return 'text-yellow-600 bg-yellow-50';
-    return 'text-orange-600 bg-orange-50';
-  };
-
   // 이미지 업로드 핸들러
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -303,8 +286,8 @@ export default function WODStrategy() {
           if (movement.name) {
             if (movement.isProgressive && movement.progressivePattern) {
               text += `${movement.name} ${movement.progressivePattern}`;
-              if (movement.isScaled && movement.rxdWeight) {
-                text += ` @ ${movement.rxdWeight}${movement.weightUnit || 'lb'}`;
+              if (movement.weight) {
+                text += ` @ ${movement.weight}${movement.weightUnit || 'lb'}`;
               }
               text += '\n';
             } else {
@@ -314,30 +297,11 @@ export default function WODStrategy() {
                 ? `${movement.value}${movement.unit || 'm'}`
                 : movement.value;
 
-              // Rx 또는 Scaled 표시
-              if (movement.isScaled) {
-                // Rx 동작 표시
-                text += `${valueText} ${movement.name}`;
-                if (movement.rxdWeight) {
-                  text += ` @ ${movement.rxdWeight}${movement.weightUnit || 'lb'} (Rx)`;
-                }
-                text += '\n';
-
-                // Scaled 동작 표시
-                if (movement.scaledMovementName || movement.scaledWeight) {
-                  text += `  → Scaled: ${valueText} ${movement.scaledMovementName || movement.name}`;
-                  if (movement.scaledWeight) {
-                    const percentage = calculateWeightPercentage(movement.rxdWeight, movement.scaledWeight);
-                    text += ` @ ${movement.scaledWeight}${movement.weightUnit || 'lb'}`;
-                    if (percentage) {
-                      text += ` (${percentage}%)`;
-                    }
-                  }
-                  text += '\n';
-                }
-              } else {
-                text += `${valueText} ${movement.name}\n`;
+              text += `${valueText} ${movement.name}`;
+              if (movement.weight) {
+                text += ` @ ${movement.weight}${movement.weightUnit || 'lb'}`;
               }
+              text += '\n';
             }
           }
         });
@@ -466,10 +430,10 @@ export default function WODStrategy() {
                   </div>
 
                   {/* 섹션 헤더 */}
-                  <div className="p-3 md:p-4 border-b border-light-border space-y-2">
-                    {/* 첫 번째 줄: 타입과 액션 버튼만 (시간 입력 없음) */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 md:gap-2 ml-8 flex-shrink-0">
+                  <div className="p-2.5 md:p-4 border-b border-light-border space-y-2">
+                    {/* 첫 번째 줄: 타입과 액션 버튼만 */}
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1 ml-7 min-w-0">
                         {/* 드래그 핸들 - 모바일에서 숨김 */}
                         <button
                           className="hidden md:block p-1 hover:bg-light-bg rounded-lg transition-colors cursor-move flex-shrink-0"
@@ -478,30 +442,30 @@ export default function WODStrategy() {
                           <GripVertical className="w-5 h-5 text-text-tertiary" />
                         </button>
 
-                        <span className="font-bold text-text-primary text-sm md:text-base">
+                        <span className="font-bold text-text-primary text-xs md:text-base truncate">
                           {section.type}
                         </span>
                       </div>
 
                       {/* 섹션 액션 버튼 - 항상 보임 */}
-                      <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
+                      <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
                         <button
                           onClick={() => duplicateSection(section.id)}
-                          className="p-1.5 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
+                          className="p-1 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
                           title="복제"
                         >
                           <Copy className="w-3.5 h-3.5 md:w-4 md:h-4 text-text-tertiary" />
                         </button>
                         <button
                           onClick={() => deleteSection(section.id)}
-                          className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1 md:p-2 hover:bg-red-50 rounded-lg transition-colors"
                           title="삭제"
                         >
                           <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
                         </button>
                         <button
                           onClick={() => toggleSection(section.id)}
-                          className="p-1.5 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
+                          className="p-1 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
                           title={isExpanded ? "접기" : "펼치기"}
                         >
                           {isExpanded ? (
@@ -515,63 +479,63 @@ export default function WODStrategy() {
 
                     {/* 두 번째 줄: 시간 입력만 (펼쳤을 때 또는 REST 타입) */}
                     {(isExpanded || isRest) && (
-                      <div className="ml-8 text-sm">
+                      <div className="ml-7 text-sm">
                         {isRest && (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
                             <input
                               type="number"
                               value={section.duration || ''}
                               onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
-                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border"
+                              className="w-12 md:w-16 px-1.5 py-1 rounded-lg border border-light-border text-sm"
                               placeholder="3"
                             />
                             <span className="text-xs text-text-tertiary">분</span>
                           </div>
                         )}
                         {!isRest && section.type === 'AMRAP' && (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
                             <input
                               type="number"
                               value={section.duration || ''}
                               onChange={(e) => updateSection(section.id, { duration: parseInt(e.target.value) || 0 })}
-                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border"
+                              className="w-12 md:w-16 px-1.5 py-1 rounded-lg border border-light-border text-sm"
                               placeholder="5"
                             />
                             <span className="text-xs text-text-tertiary">분</span>
                           </div>
                         )}
                         {!isRest && section.type === 'FOR_TIME' && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-text-tertiary">Timecap:</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-text-tertiary hidden sm:inline">Cap:</span>
                             <input
                               type="number"
                               value={section.timecap || ''}
                               onChange={(e) => updateSection(section.id, { timecap: parseInt(e.target.value) || undefined })}
-                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border"
+                              className="w-12 md:w-16 px-1.5 py-1 rounded-lg border border-light-border text-sm"
                               placeholder="20"
                             />
                             <span className="text-xs text-text-tertiary">분</span>
                           </div>
                         )}
                         {!isRest && section.type === 'EMOM' && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-text-tertiary">Every</span>
+                          <div className="flex flex-wrap items-center gap-1.5 text-xs">
                             <input
                               type="number"
                               value={section.interval || ''}
                               onChange={(e) => updateSection(section.id, { interval: parseInt(e.target.value) || 1 })}
-                              className="w-12 md:w-14 px-2 py-1 rounded-lg border border-light-border"
+                              className="w-10 md:w-12 px-1.5 py-1 rounded-lg border border-light-border"
                               placeholder="1"
                             />
-                            <span className="text-xs text-text-tertiary">분 x</span>
+                            <span className="text-text-tertiary">분</span>
+                            <span className="text-text-tertiary">×</span>
                             <input
                               type="number"
                               value={section.rounds || ''}
                               onChange={(e) => updateSection(section.id, { rounds: parseInt(e.target.value) || 0 })}
-                              className="w-14 md:w-16 px-2 py-1 rounded-lg border border-light-border"
+                              className="w-12 md:w-16 px-1.5 py-1 rounded-lg border border-light-border"
                               placeholder="10"
                             />
-                            <span className="text-xs text-text-tertiary">라운드</span>
+                            <span className="text-text-tertiary">R</span>
                           </div>
                         )}
                       </div>
@@ -611,143 +575,6 @@ export default function WODStrategy() {
                                   </div>
                                 )}
                               </div>
-
-                              {/* Rx/Scaled 토글 */}
-                              <div className="flex items-center gap-2 pt-1">
-                                <button
-                                  onClick={() => updateMovement(section.id, movement.id, { isScaled: false })}
-                                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                                    !movement.isScaled
-                                      ? 'bg-primary text-white'
-                                      : 'bg-light-bg text-text-tertiary hover:bg-light-card-hover'
-                                  }`}
-                                >
-                                  Rx
-                                </button>
-                                <button
-                                  onClick={() => updateMovement(section.id, movement.id, { isScaled: true })}
-                                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                                    movement.isScaled
-                                      ? 'bg-secondary text-white'
-                                      : 'bg-light-bg text-text-tertiary hover:bg-light-card-hover'
-                                  }`}
-                                >
-                                  Scaled
-                                </button>
-                              </div>
-
-                              {/* Scaled 옵션 */}
-                              {movement.isScaled && (
-                                <div className="space-y-2 pl-3 border-l-2 border-secondary/30">
-                                  {/* 동작 변경 옵션 */}
-                                  <div className="flex items-center gap-2">
-                                    <input
-                                      type="checkbox"
-                                      id={`scaled-movement-${movement.id}`}
-                                      checked={!!movement.scaledMovementName}
-                                      onChange={(e) => updateMovement(section.id, movement.id, {
-                                        scaledMovementName: e.target.checked ? '' : undefined
-                                      })}
-                                      className="rounded border-light-border"
-                                    />
-                                    <label htmlFor={`scaled-movement-${movement.id}`} className="text-xs text-text-secondary">
-                                      다른 동작으로 스케일
-                                    </label>
-                                  </div>
-
-                                  {/* 스케일 동작명 입력 */}
-                                  {movement.scaledMovementName !== undefined && (
-                                    <div className="relative">
-                                      <input
-                                        type="text"
-                                        value={movement.scaledMovementName}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          updateMovement(section.id, movement.id, { scaledMovementName: value });
-                                          // 자동완성 트리거
-                                          if (value.length >= 2) {
-                                            const filtered = CROSSFIT_MOVEMENTS.filter(m =>
-                                              m.toLowerCase().includes(value.toLowerCase())
-                                            ).slice(0, 5);
-                                            setMovementSuggestions({ ...movementSuggestions, [`scaled-${movement.id}`]: filtered });
-                                          } else {
-                                            const newSuggestions = { ...movementSuggestions };
-                                            delete newSuggestions[`scaled-${movement.id}`];
-                                            setMovementSuggestions(newSuggestions);
-                                          }
-                                        }}
-                                        placeholder="스케일 동작명 (예: Pull-up)"
-                                        className="w-full px-3 py-2 rounded-lg border border-light-border text-sm bg-secondary-light/10"
-                                      />
-                                      {movementSuggestions[`scaled-${movement.id}`] && movementSuggestions[`scaled-${movement.id}`].length > 0 && (
-                                        <div className="absolute z-10 w-full mt-1 bg-white border border-light-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                          {movementSuggestions[`scaled-${movement.id}`].map((suggestion, idx) => (
-                                            <button
-                                              key={idx}
-                                              onClick={() => {
-                                                updateMovement(section.id, movement.id, { scaledMovementName: suggestion });
-                                                const newSuggestions = { ...movementSuggestions };
-                                                delete newSuggestions[`scaled-${movement.id}`];
-                                                setMovementSuggestions(newSuggestions);
-                                              }}
-                                              className="w-full px-3 py-2 text-left text-sm hover:bg-primary-light transition-colors"
-                                            >
-                                              {suggestion}
-                                            </button>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-
-                                  {/* 무게 설정 */}
-                                  <div className="space-y-2">
-                                    <div className="flex items-center flex-wrap gap-1.5 md:gap-2">
-                                      <span className="text-xs text-text-tertiary min-w-[45px] md:min-w-[50px]">RxD:</span>
-                                      <input
-                                        type="number"
-                                        value={movement.rxdWeight || ''}
-                                        onChange={(e) => updateMovement(section.id, movement.id, {
-                                          rxdWeight: parseFloat(e.target.value) || undefined
-                                        })}
-                                        placeholder="135"
-                                        className="w-16 md:w-20 px-2 py-1 rounded-lg border border-light-border text-sm"
-                                      />
-                                      <select
-                                        value={movement.weightUnit || 'lb'}
-                                        onChange={(e) => updateMovement(section.id, movement.id, {
-                                          weightUnit: e.target.value as 'lb' | 'kg'
-                                        })}
-                                        className="px-2 py-1 rounded-lg border border-light-border text-xs"
-                                      >
-                                        <option value="lb">lb</option>
-                                        <option value="kg">kg</option>
-                                      </select>
-                                    </div>
-                                    <div className="flex items-center flex-wrap gap-1.5 md:gap-2">
-                                      <span className="text-xs text-text-tertiary min-w-[45px] md:min-w-[50px]">Scaled:</span>
-                                      <input
-                                        type="number"
-                                        value={movement.scaledWeight || ''}
-                                        onChange={(e) => updateMovement(section.id, movement.id, {
-                                          scaledWeight: parseFloat(e.target.value) || undefined
-                                        })}
-                                        placeholder="95"
-                                        className="w-16 md:w-20 px-2 py-1 rounded-lg border border-light-border text-sm"
-                                      />
-                                      <span className="text-xs text-text-tertiary">{movement.weightUnit || 'lb'}</span>
-                                      {(() => {
-                                        const percentage = calculateWeightPercentage(movement.rxdWeight, movement.scaledWeight);
-                                        return percentage ? (
-                                          <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${getPercentageColor(percentage)}`}>
-                                            {percentage}%
-                                          </span>
-                                        ) : null;
-                                      })()}
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
 
                               {/* 누적 패턴 체크박스 */}
                               <div className="flex items-center gap-2">
@@ -804,6 +631,30 @@ export default function WODStrategy() {
                                   )}
                                 </div>
                               )}
+
+                              {/* 무게 입력 */}
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs text-text-tertiary">무게:</span>
+                                <input
+                                  type="number"
+                                  value={movement.weight || ''}
+                                  onChange={(e) => updateMovement(section.id, movement.id, {
+                                    weight: parseFloat(e.target.value) || undefined
+                                  })}
+                                  placeholder="135"
+                                  className="w-20 px-2 py-1.5 rounded-lg border border-light-border text-sm"
+                                />
+                                <select
+                                  value={movement.weightUnit || 'lb'}
+                                  onChange={(e) => updateMovement(section.id, movement.id, {
+                                    weightUnit: e.target.value as 'lb' | 'kg'
+                                  })}
+                                  className="px-2 py-1.5 rounded-lg border border-light-border text-sm"
+                                >
+                                  <option value="lb">lb</option>
+                                  <option value="kg">kg</option>
+                                </select>
+                              </div>
                             </div>
 
                             <button
