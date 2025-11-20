@@ -1,0 +1,43 @@
+name: Auto Deploy to Production
+
+on:
+  push:
+    branches:
+      - 'claude/*'
+      - '!claude/crossfit-dashboard-design-01ErGFfhi7YwMv3dkYEsvHUa'
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge to production branch
+        run: |
+          # 프로덕션 브랜치 체크아웃
+          git fetch origin claude/crossfit-dashboard-design-01ErGFfhi7YwMv3dkYEsvHUa
+          git checkout claude/crossfit-dashboard-design-01ErGFfhi7YwMv3dkYEsvHUa
+
+          # 현재 브랜치 머지
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "Merging $BRANCH_NAME into production branch..."
+
+          git merge origin/$BRANCH_NAME -m "Auto-merge: $BRANCH_NAME → production"
+
+          # 프로덕션 브랜치에 푸시
+          git push origin claude/crossfit-dashboard-design-01ErGFfhi7YwMv3dkYEsvHUa
+
+      - name: Deployment notification
+        run: |
+          echo "✅ Successfully merged to production branch"
+          echo "🚀 Vercel will automatically deploy the changes"
