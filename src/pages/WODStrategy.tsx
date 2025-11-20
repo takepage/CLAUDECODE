@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Sparkles, Plus, Trash2, Copy, Clock, Zap, Timer, Target, ChevronDown, ChevronUp, GripVertical, Upload, Image, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sparkles, Plus, Trash2, Copy, Clock, Zap, Timer, Target, ChevronDown, ChevronUp, GripVertical, Upload, Image, X, Save, FolderOpen, Edit2 } from 'lucide-react';
 
 // 크로스핏 동작 리스트 (자동완성용)
 const CROSSFIT_MOVEMENTS = [
@@ -78,7 +78,41 @@ interface Section {
   interval?: number; // EMOM 간격 (분)
   timecap?: number;
   movements: Movement[];
+  // TEAM WOD 설정
+  teamSize?: number; // 1=개인, 2=2인, 3=3인 등
+  teamStrategy?: 'synchro' | 'split' | 'alternate-rounds' | 'alternate-movements';
 }
+
+interface SavedWOD {
+  id: string;
+  name: string;
+  date: string;
+  sections: Section[];
+}
+
+// LocalStorage 유틸리티
+const STORAGE_KEY = 'saved-wods';
+
+const getSavedWODs = (): SavedWOD[] => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  return saved ? JSON.parse(saved) : [];
+};
+
+const saveWODToStorage = (wod: SavedWOD) => {
+  const wods = getSavedWODs();
+  const existing = wods.findIndex(w => w.id === wod.id);
+  if (existing >= 0) {
+    wods[existing] = wod;
+  } else {
+    wods.push(wod);
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(wods));
+};
+
+const deleteWODFromStorage = (id: string) => {
+  const wods = getSavedWODs().filter(w => w.id !== id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(wods));
+};
 
 export default function WODStrategy() {
   const [sections, setSections] = useState<Section[]>([]);
@@ -87,6 +121,19 @@ export default function WODStrategy() {
   const [movementSuggestions, setMovementSuggestions] = useState<{ [key: string]: string[] }>({});
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // 저장/불러오기 관련 state
+  const [wodName, setWodName] = useState('');
+  const [currentWodId, setCurrentWodId] = useState<string | null>(null);
+  const [savedWODs, setSavedWODs] = useState<SavedWOD[]>([]);
+  const [showSavedWODs, setShowSavedWODs] = useState(false);
+  const [editingWodId, setEditingWodId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
+
+  // 저장된 WOD 목록 로드
+  useEffect(() => {
+    setSavedWODs(getSavedWODs());
+  }, []);
 
   // 섹션 추가
   const addSection = (type: Section['type']) => {
@@ -175,6 +222,30 @@ export default function WODStrategy() {
     ));
   };
 
+  // 동작 복제
+  const duplicateMovement = (sectionId: string, movementId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (!section) return;
+
+    const movement = section.movements.find(m => m.id === movementId);
+    if (!movement) return;
+
+    const newMovement: Movement = {
+      ...movement,
+      id: `movement-${Date.now()}-${Math.random()}`
+    };
+
+    const movementIndex = section.movements.findIndex(m => m.id === movementId);
+    const newMovements = [...section.movements];
+    newMovements.splice(movementIndex + 1, 0, newMovement);
+
+    setSections(sections.map(s =>
+      s.id === sectionId
+        ? { ...s, movements: newMovements }
+        : s
+    ));
+  };
+
   // 동작 삭제
   const deleteMovement = (sectionId: string, movementId: string) => {
     setSections(sections.map(s =>
@@ -232,6 +303,88 @@ export default function WODStrategy() {
     setExpandedSections(newExpanded);
   };
 
+  // WOD 저장
+  const handleSaveWOD = () => {
+    if (sections.length === 0) {
+      alert('저장할 WOD가 없습니다.');
+      return;
+    }
+
+    const now = new Date();
+    const defaultName = `${now.getMonth() + 1}/${now.getDate()} WOD`;
+    const name = wodName.trim() || defaultName;
+    const id = currentWodId || `wod-${Date.now()}`;
+
+    const savedWOD: SavedWOD = {
+      id,
+      name,
+      date: new Date().toISOString(),
+      sections
+    };
+
+    saveWODToStorage(savedWOD);
+    setSavedWODs(getSavedWODs());
+    setCurrentWodId(id);
+
+    // 이름이 없었으면 자동 생성된 이름으로 설정
+    if (!wodName.trim()) {
+      setWodName(name);
+    }
+  };
+
+  // WOD 불러오기
+  const handleLoadWOD = (wod: SavedWOD) => {
+    setSections(wod.sections);
+    setWodName(wod.name);
+    setCurrentWodId(wod.id);
+    setShowSavedWODs(false);
+
+    // 모든 섹션 펼치기
+    const allSectionIds = new Set(wod.sections.map(s => s.id));
+    setExpandedSections(allSectionIds);
+  };
+
+  // WOD 삭제
+  const handleDeleteWOD = (id: string) => {
+    if (confirm('정말 삭제하시겠습니까?')) {
+      deleteWODFromStorage(id);
+      setSavedWODs(getSavedWODs());
+
+      // 현재 편집 중인 WOD를 삭제한 경우
+      if (currentWodId === id) {
+        setCurrentWodId(null);
+        setWodName('');
+      }
+    }
+  };
+
+  // WOD 이름 수정
+  const handleRenameWOD = (id: string, newName: string) => {
+    const wod = savedWODs.find(w => w.id === id);
+    if (wod && newName.trim()) {
+      const updatedWOD = { ...wod, name: newName.trim() };
+      saveWODToStorage(updatedWOD);
+      setSavedWODs(getSavedWODs());
+
+      if (currentWodId === id) {
+        setWodName(newName.trim());
+      }
+    }
+    setEditingWodId(null);
+    setEditingName('');
+  };
+
+  // 새 WOD 시작
+  const handleNewWOD = () => {
+    if (sections.length > 0 && !confirm('현재 WOD를 지우고 새로 시작하시겠습니까?')) {
+      return;
+    }
+    setSections([]);
+    setWodName('');
+    setCurrentWodId(null);
+    setExpandedSections(new Set());
+  };
+
   // 이미지 업로드 핸들러
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -281,6 +434,17 @@ export default function WODStrategy() {
           text = `EMOM ${section.rounds || 10}${section.interval && section.interval > 1 ? ` (Every ${section.interval}min)` : ''}\n`;
         }
 
+        // TEAM WOD 정보 추가
+        if (section.teamSize && section.teamSize > 1) {
+          const strategies: { [key: string]: string } = {
+            'synchro': '싱크로',
+            'split': '스플릿',
+            'alternate-rounds': '교대(라운드)',
+            'alternate-movements': '교대(동작)'
+          };
+          text += `[TEAM ${section.teamSize}인 - ${strategies[section.teamStrategy || 'synchro']}]\n`;
+        }
+
         // 동작 추가
         section.movements.forEach(movement => {
           if (movement.name) {
@@ -318,10 +482,50 @@ export default function WODStrategy() {
         <div className="p-2 md:p-3 rounded-xl bg-primary-light">
           <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-primary" />
         </div>
-        <div>
+        <div className="flex-1">
           <h2 className="text-xl md:text-2xl font-bold text-text-primary">WOD 전략 분석</h2>
           <p className="text-xs md:text-sm text-text-secondary">블록을 추가하여 복잡한 WOD도 쉽게 구성하세요</p>
         </div>
+      </div>
+
+      {/* WOD 저장/불러오기 바 */}
+      <div className="card p-3 md:p-4 mb-6 space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleSaveWOD}
+            disabled={sections.length === 0}
+            className="px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <Save className="w-4 h-4" />
+            빠른 저장
+          </button>
+          <input
+            type="text"
+            value={wodName}
+            onChange={(e) => setWodName(e.target.value)}
+            placeholder="이름 (선택사항, 예: Fran)"
+            className="flex-1 min-w-[150px] px-3 py-2 rounded-lg border border-light-border text-sm"
+          />
+          <button
+            onClick={() => setShowSavedWODs(true)}
+            className="px-4 py-2 bg-secondary text-white rounded-lg font-semibold text-sm hover:bg-secondary-dark transition-colors flex items-center gap-2"
+          >
+            <FolderOpen className="w-4 h-4" />
+            불러오기 ({savedWODs.length})
+          </button>
+          <button
+            onClick={handleNewWOD}
+            className="px-4 py-2 bg-light-bg text-text-secondary rounded-lg font-semibold text-sm hover:bg-light-card-hover transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            새로 만들기
+          </button>
+        </div>
+        {currentWodId && wodName && (
+          <p className="text-xs text-text-tertiary">
+            현재 편집 중: <span className="font-semibold text-primary">{wodName}</span>
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -545,6 +749,45 @@ export default function WODStrategy() {
                   {/* 섹션 내용 */}
                   {isExpanded && !isRest && (
                     <div className="p-4 space-y-3">
+                      {/* TEAM WOD 설정 */}
+                      <div className="p-3 rounded-xl bg-accent-purple/5 border border-accent-purple/20">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span className="font-semibold text-text-primary">TEAM:</span>
+                          <select
+                            value={section.teamSize || 1}
+                            onChange={(e) => {
+                              const size = parseInt(e.target.value);
+                              updateSection(section.id, {
+                                teamSize: size,
+                                teamStrategy: size > 1 ? section.teamStrategy || 'synchro' : undefined
+                              });
+                            }}
+                            className="px-2 py-1 rounded-lg border border-light-border text-xs"
+                          >
+                            <option value={1}>개인</option>
+                            <option value={2}>2인</option>
+                            <option value={3}>3인</option>
+                            <option value={4}>4인</option>
+                          </select>
+
+                          {section.teamSize && section.teamSize > 1 && (
+                            <>
+                              <span className="text-text-tertiary">|</span>
+                              <select
+                                value={section.teamStrategy || 'synchro'}
+                                onChange={(e) => updateSection(section.id, { teamStrategy: e.target.value as any })}
+                                className="px-2 py-1 rounded-lg border border-light-border text-xs"
+                              >
+                                <option value="synchro">싱크로 (함께)</option>
+                                <option value="split">스플릿 (분할)</option>
+                                <option value="alternate-rounds">교대 (라운드별)</option>
+                                <option value="alternate-movements">교대 (동작별)</option>
+                              </select>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
                       {/* 동작 리스트 */}
                       {section.movements.map((movement, mIndex) => (
                         <div key={movement.id} className="p-2 md:p-3 rounded-xl bg-light-bg border border-light-border">
@@ -657,12 +900,22 @@ export default function WODStrategy() {
                               </div>
                             </div>
 
-                            <button
-                              onClick={() => deleteMovement(section.id, movement.id)}
-                              className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors mt-1 flex-shrink-0"
-                            >
-                              <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
-                            </button>
+                            <div className="flex flex-col gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => duplicateMovement(section.id, movement.id)}
+                                className="p-1.5 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
+                                title="복제"
+                              >
+                                <Copy className="w-3.5 h-3.5 md:w-4 md:h-4 text-text-tertiary" />
+                              </button>
+                              <button
+                                onClick={() => deleteMovement(section.id, movement.id)}
+                                className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors"
+                                title="삭제"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -708,6 +961,139 @@ export default function WODStrategy() {
           )}
         </div>
       </div>
+
+      {/* 저장된 WOD 목록 모달 */}
+      {showSavedWODs && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowSavedWODs(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* 모달 헤더 */}
+            <div className="p-4 md:p-6 border-b border-light-border flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-secondary-light">
+                  <FolderOpen className="w-5 h-5 text-secondary" />
+                </div>
+                <div>
+                  <h3 className="text-lg md:text-xl font-bold text-text-primary">저장된 WOD</h3>
+                  <p className="text-xs text-text-tertiary">총 {savedWODs.length}개</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSavedWODs(false)}
+                className="p-2 hover:bg-light-bg rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-text-tertiary" />
+              </button>
+            </div>
+
+            {/* WOD 목록 */}
+            <div className="p-4 md:p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
+              {savedWODs.length === 0 ? (
+                <div className="text-center py-12">
+                  <FolderOpen className="w-16 h-16 text-text-tertiary mx-auto mb-4 opacity-50" />
+                  <p className="text-text-tertiary">저장된 WOD가 없습니다</p>
+                  <p className="text-xs text-text-tertiary mt-2">WOD를 구성하고 저장해보세요!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {savedWODs
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((wod) => (
+                      <div
+                        key={wod.id}
+                        className="p-4 rounded-xl border border-light-border hover:border-primary hover:bg-primary-light/10 transition-all group"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            {editingWodId === wod.id ? (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={editingName}
+                                  onChange={(e) => setEditingName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      handleRenameWOD(wod.id, editingName);
+                                    } else if (e.key === 'Escape') {
+                                      setEditingWodId(null);
+                                      setEditingName('');
+                                    }
+                                  }}
+                                  className="flex-1 px-2 py-1 rounded-lg border border-primary text-sm font-semibold"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => handleRenameWOD(wod.id, editingName)}
+                                  className="px-3 py-1 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary-dark"
+                                >
+                                  확인
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditingWodId(null);
+                                    setEditingName('');
+                                  }}
+                                  className="px-3 py-1 bg-light-bg text-text-secondary rounded-lg text-xs font-semibold hover:bg-light-card-hover"
+                                >
+                                  취소
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <h4 className="font-bold text-text-primary mb-1 truncate">{wod.name}</h4>
+                                <p className="text-xs text-text-tertiary mb-2">
+                                  {new Date(wod.date).toLocaleDateString('ko-KR', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                                <p className="text-xs text-text-secondary">
+                                  {wod.sections.length}개 섹션
+                                  {' · '}
+                                  {wod.sections.reduce((acc, s) => acc + s.movements.length, 0)}개 동작
+                                </p>
+                              </>
+                            )}
+                          </div>
+
+                          {editingWodId !== wod.id && (
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => handleLoadWOD(wod)}
+                                className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary-dark transition-colors"
+                              >
+                                불러오기
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingWodId(wod.id);
+                                  setEditingName(wod.name);
+                                }}
+                                className="p-1.5 hover:bg-light-bg rounded-lg transition-colors"
+                                title="이름 수정"
+                              >
+                                <Edit2 className="w-4 h-4 text-text-tertiary" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteWOD(wod.id)}
+                                className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                                title="삭제"
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
