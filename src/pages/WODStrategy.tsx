@@ -78,6 +78,9 @@ interface Section {
   interval?: number; // EMOM 간격 (분)
   timecap?: number;
   movements: Movement[];
+  // TEAM WOD 설정
+  teamSize?: number; // 1=개인, 2=2인, 3=3인 등
+  teamStrategy?: 'synchro' | 'split' | 'alternate-rounds' | 'alternate-movements';
 }
 
 interface SavedWOD {
@@ -219,6 +222,30 @@ export default function WODStrategy() {
     ));
   };
 
+  // 동작 복제
+  const duplicateMovement = (sectionId: string, movementId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (!section) return;
+
+    const movement = section.movements.find(m => m.id === movementId);
+    if (!movement) return;
+
+    const newMovement: Movement = {
+      ...movement,
+      id: `movement-${Date.now()}-${Math.random()}`
+    };
+
+    const movementIndex = section.movements.findIndex(m => m.id === movementId);
+    const newMovements = [...section.movements];
+    newMovements.splice(movementIndex + 1, 0, newMovement);
+
+    setSections(sections.map(s =>
+      s.id === sectionId
+        ? { ...s, movements: newMovements }
+        : s
+    ));
+  };
+
   // 동작 삭제
   const deleteMovement = (sectionId: string, movementId: string) => {
     setSections(sections.map(s =>
@@ -283,7 +310,9 @@ export default function WODStrategy() {
       return;
     }
 
-    const name = wodName.trim() || `WOD ${new Date().toLocaleDateString()}`;
+    const now = new Date();
+    const defaultName = `${now.getMonth() + 1}/${now.getDate()} WOD`;
+    const name = wodName.trim() || defaultName;
     const id = currentWodId || `wod-${Date.now()}`;
 
     const savedWOD: SavedWOD = {
@@ -296,8 +325,11 @@ export default function WODStrategy() {
     saveWODToStorage(savedWOD);
     setSavedWODs(getSavedWODs());
     setCurrentWodId(id);
-    setWodName(name);
-    alert(`"${name}" 저장 완료!`);
+
+    // 이름이 없었으면 자동 생성된 이름으로 설정
+    if (!wodName.trim()) {
+      setWodName(name);
+    }
   };
 
   // WOD 불러오기
@@ -402,6 +434,17 @@ export default function WODStrategy() {
           text = `EMOM ${section.rounds || 10}${section.interval && section.interval > 1 ? ` (Every ${section.interval}min)` : ''}\n`;
         }
 
+        // TEAM WOD 정보 추가
+        if (section.teamSize && section.teamSize > 1) {
+          const strategies: { [key: string]: string } = {
+            'synchro': '싱크로',
+            'split': '스플릿',
+            'alternate-rounds': '교대(라운드)',
+            'alternate-movements': '교대(동작)'
+          };
+          text += `[TEAM ${section.teamSize}인 - ${strategies[section.teamStrategy || 'synchro']}]\n`;
+        }
+
         // 동작 추가
         section.movements.forEach(movement => {
           if (movement.name) {
@@ -448,21 +491,21 @@ export default function WODStrategy() {
       {/* WOD 저장/불러오기 바 */}
       <div className="card p-3 md:p-4 mb-6 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="text"
-            value={wodName}
-            onChange={(e) => setWodName(e.target.value)}
-            placeholder="WOD 이름 (예: Fran, Murph)"
-            className="flex-1 min-w-[200px] px-3 py-2 rounded-lg border border-light-border text-sm"
-          />
           <button
             onClick={handleSaveWOD}
             disabled={sections.length === 0}
             className="px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            저장
+            빠른 저장
           </button>
+          <input
+            type="text"
+            value={wodName}
+            onChange={(e) => setWodName(e.target.value)}
+            placeholder="이름 (선택사항, 예: Fran)"
+            className="flex-1 min-w-[150px] px-3 py-2 rounded-lg border border-light-border text-sm"
+          />
           <button
             onClick={() => setShowSavedWODs(true)}
             className="px-4 py-2 bg-secondary text-white rounded-lg font-semibold text-sm hover:bg-secondary-dark transition-colors flex items-center gap-2"
@@ -706,6 +749,45 @@ export default function WODStrategy() {
                   {/* 섹션 내용 */}
                   {isExpanded && !isRest && (
                     <div className="p-4 space-y-3">
+                      {/* TEAM WOD 설정 */}
+                      <div className="p-3 rounded-xl bg-accent-purple/5 border border-accent-purple/20">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span className="font-semibold text-text-primary">TEAM:</span>
+                          <select
+                            value={section.teamSize || 1}
+                            onChange={(e) => {
+                              const size = parseInt(e.target.value);
+                              updateSection(section.id, {
+                                teamSize: size,
+                                teamStrategy: size > 1 ? section.teamStrategy || 'synchro' : undefined
+                              });
+                            }}
+                            className="px-2 py-1 rounded-lg border border-light-border text-xs"
+                          >
+                            <option value={1}>개인</option>
+                            <option value={2}>2인</option>
+                            <option value={3}>3인</option>
+                            <option value={4}>4인</option>
+                          </select>
+
+                          {section.teamSize && section.teamSize > 1 && (
+                            <>
+                              <span className="text-text-tertiary">|</span>
+                              <select
+                                value={section.teamStrategy || 'synchro'}
+                                onChange={(e) => updateSection(section.id, { teamStrategy: e.target.value as any })}
+                                className="px-2 py-1 rounded-lg border border-light-border text-xs"
+                              >
+                                <option value="synchro">싱크로 (함께)</option>
+                                <option value="split">스플릿 (분할)</option>
+                                <option value="alternate-rounds">교대 (라운드별)</option>
+                                <option value="alternate-movements">교대 (동작별)</option>
+                              </select>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
                       {/* 동작 리스트 */}
                       {section.movements.map((movement, mIndex) => (
                         <div key={movement.id} className="p-2 md:p-3 rounded-xl bg-light-bg border border-light-border">
@@ -818,12 +900,22 @@ export default function WODStrategy() {
                               </div>
                             </div>
 
-                            <button
-                              onClick={() => deleteMovement(section.id, movement.id)}
-                              className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors mt-1 flex-shrink-0"
-                            >
-                              <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
-                            </button>
+                            <div className="flex flex-col gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => duplicateMovement(section.id, movement.id)}
+                                className="p-1.5 md:p-2 hover:bg-light-bg rounded-lg transition-colors"
+                                title="복제"
+                              >
+                                <Copy className="w-3.5 h-3.5 md:w-4 md:h-4 text-text-tertiary" />
+                              </button>
+                              <button
+                                onClick={() => deleteMovement(section.id, movement.id)}
+                                className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg transition-colors"
+                                title="삭제"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
