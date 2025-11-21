@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Calendar, Clock, Smile, Meh, Frown } from 'lucide-react';
-import { WorkoutSession, WorkoutBlock, Feeling, FEELING_CONFIG } from '../types/workout';
+import { Plus, Calendar, Clock } from 'lucide-react';
+import type { WorkoutSession, WorkoutBlock, Feeling } from '../types/workout';
+import { FEELING_CONFIG, BLOCK_TYPE_CONFIG } from '../types/workout';
 import { getWorkoutSessions, saveWorkoutSession, getSessionByDate } from '../utils/storage';
 import WorkoutBlockCard from '../components/workout/WorkoutBlockCard';
 import AddBlockModal from '../components/workout/AddBlockModal';

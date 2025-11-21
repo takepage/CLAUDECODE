@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { WorkoutBlock, BlockType, BLOCK_TYPE_CONFIG, WeightUnit } from '../../types/workout';
+import type { WorkoutBlock, BlockType, WeightUnit } from '../../types/workout';
+import { BLOCK_TYPE_CONFIG } from '../../types/workout';
 
 interface AddBlockModalProps {
   isOpen: boolean;
@@ -66,8 +67,6 @@ const AddBlockModal: React.FC<AddBlockModalProps> = ({ isOpen, onClose, onSave, 
   };
 
   if (!isOpen) return null;
-
-  const config = BLOCK_TYPE_CONFIG[blockType];
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

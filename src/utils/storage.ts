@@ -1,4 +1,4 @@
-import { WorkoutSession, OneRMRecord } from '../types/workout';
+import type { WorkoutSession, OneRMRecord } from '../types/workout';
 
 const STORAGE_KEYS = {
   SESSIONS: 'workout-sessions',

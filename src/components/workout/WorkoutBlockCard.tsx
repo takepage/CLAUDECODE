@@ -1,5 +1,6 @@
 import React from 'react';
-import { WorkoutBlock, BLOCK_TYPE_CONFIG } from '../../types/workout';
+import type { WorkoutBlock } from '../../types/workout';
+import { BLOCK_TYPE_CONFIG } from '../../types/workout';
 import { Clock, Trash2, Edit, Award } from 'lucide-react';
 
 interface WorkoutBlockCardProps {
