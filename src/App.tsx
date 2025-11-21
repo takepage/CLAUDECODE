@@ -5,6 +5,7 @@ import WODStrategy from './pages/WODStrategy';
 import Logbook from './pages/Logbook';
 import Profile from './pages/Profile';
 import Stats from './pages/Stats';
+import Record from './pages/Record';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="record" element={<Record />} />
           <Route path="wod-strategy" element={<WODStrategy />} />
           <Route path="logbook" element={<Logbook />} />
           <Route path="profile" element={<Profile />} />

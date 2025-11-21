@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, User, BarChart3, Dumbbell, Sparkles, X } from 'lucide-react';
+import { LayoutDashboard, BookOpen, User, BarChart3, Dumbbell, Sparkles, X, PenLine } from 'lucide-react';
 
 const menuItems = [
   { icon: LayoutDashboard, label: '대시보드', path: '/' },
+  { icon: PenLine, label: '운동 기록', path: '/record' },
   { icon: Sparkles, label: 'WOD 전략', path: '/wod-strategy' },
-  { icon: BookOpen, label: '운동 기록', path: '/logbook' },
+  { icon: BookOpen, label: '로그북', path: '/logbook' },
   { icon: User, label: '내 프로필', path: '/profile' },
   { icon: BarChart3, label: '통계', path: '/stats' },
 ];
